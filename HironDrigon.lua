@@ -9502,7 +9502,7 @@ local function copyDiscordLink()
 end
 -- ===== AVISO AO EXECUTAR =====
 Window:Dialog({
-Title = "Aviso do Hub",
+Title = "Aviso do HironDrigon hub",
 Text = "opa! você acabou de executar o HironDrigon Hub, divirta-se!",
 Options = {
 {"OK", function()
