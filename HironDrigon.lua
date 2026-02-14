@@ -25,12 +25,6 @@ end
 
 local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://10723415903" })
 
-InfoTab:AddDiscordInvite({
-    Name = "HironDrigon",
-    Description = "Discord",
-    Logo = "rbxassetid://115421377734948",
-    Invite = "https://discord.gg/J3W7FCRD2D"
-})
 
 InfoTab:AddSection({ "Informações do Script" })
 InfoTab:AddParagraph({ "Owner / Developer:", "Owner: Medr0so_0 | sub-owner: Arthurfelipe_blox2" })
