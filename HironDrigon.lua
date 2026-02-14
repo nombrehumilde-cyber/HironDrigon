@@ -27,9 +27,9 @@ local InfoTab = Window:MakeTab({ Title =
 
 "Info", Icon = "rbxassetid://10723415903" })
 InfoTab:AddDiscordInvite({
-    Name = "?",
+    Name = "HironDrigon",
     Description = "Discord",
-    Invite = "https://discord.gg/AU54XWqX",
+    Invite = "https://discord.gg/J3W7FCRD2D",
 })
 
 InfoTab:AddSection({ "Informações do Script" })
