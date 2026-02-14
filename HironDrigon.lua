@@ -12,25 +12,10 @@ Window:AddMinimizeButton({
     Button = { Image = "rbxassetid://115421377734948", BackgroundTransparency = 0 },
     Corner = { CornerRadius = UDim.new(35, 1) },
 })
-local args = {
-    [1] = "RolePlayName",
-    [2] = "HiroDragon Hub By Medr0so_0    And    Arthurfelipe_blox2"
-}
-
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1RPNam1eTex1t"):FireServer(unpack(args))
-local function copyDiscordLink()
-    setclipboard("https://discord.gg/JTxVVp33xD")
-end
-
 
 local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://10723415903" })
 
-InfoTab:AddDiscordInvite({
-    Name = "HironDrigon",
-    Description = "Discord",
-    Logo = "rbxassetid://115421377734948",
-    Invite = "https://discord.gg/J3W7FCRD2D"
-})
+
 
 InfoTab:AddSection({ "Informações do Script" })
 InfoTab:AddParagraph({ "Owner / Developer:", "Owner: Medr0so_0 | sub-owner: Arthurfelipe_blox2" })
@@ -9490,23 +9475,4 @@ protec:AddToggle({
             _G.hiddenDoors = {}
         end
     end
-})
-local args = {
-    [1] = "RolePlayName",
-    [2] = "HiroDragon Hub By Medr0so_0    And    Arthurfelipe_blox2"
-}
-
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1RPNam1eTex1t"):FireServer(unpack(args))
-local function copyDiscordLink()
-    setclipboard("https://discord.gg/JTxVVp33xD")
-end
--- ===== AVISO AO EXECUTAR =====
-Window:Dialog({
-Title = "Aviso do Hub",
-Text = "opa! você acabou de executar o HironDrigon Hub, divirta-se!",
-Options = {
-{"OK", function()
-print("Aviso fechado pelo jogador")
-end}
-}
 })
