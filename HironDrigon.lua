@@ -28,6 +28,7 @@ local InfoTab = Window:MakeTab({ Title =
 "Info", Icon = "rbxassetid://115421377734948" })
 InfoTab:AddDiscordInvite({
     Name = "HironDrigon",
+    Icon = "rbxassetid://115421377734948"
     Description = "Discord",
     Invite = "https://discord.gg/J3W7FCRD2D",
 })
