@@ -23,8 +23,14 @@ local function copyDiscordLink()
 end
 
 
-local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://10723415903" })
+local InfoTab = Window:MakeTab({ Title = 
 
+"Info", Icon = "rbxassetid://10723415903" })
+InfoTab:AddDiscordInvite({
+    Name = "?",
+    Description = "Discord",
+    Invite = "https://discord.gg/AU54XWqX",
+})
 
 InfoTab:AddSection({ "Informações do Script" })
 InfoTab:AddParagraph({ "Owner / Developer:", "Owner: Medr0so_0 | sub-owner: Arthurfelipe_blox2" })
