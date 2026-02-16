@@ -1,12 +1,8 @@
--- // CMDX Advanced UI Library
-
-local CMDX = {}
-CMDX.__index = CMDX
-
 function CMDX:CreateWindow(options)
 
 	local Players = game:GetService("Players")
 	local player = Players.LocalPlayer
+	local UIS = game:GetService("UserInputService")
 
 	local theme = {
 		MenuColor = options.MenuColor or Color3.fromRGB(25,25,25),
@@ -14,6 +10,7 @@ function CMDX:CreateWindow(options)
 	}
 
 	local Commands = {}
+	local minimized = false
 
 	local Window = {}
 	Window.Commands = Commands
@@ -40,8 +37,9 @@ function CMDX:CreateWindow(options)
 	topbar.BackgroundColor3 = theme.MenuColor:Lerp(Color3.new(0,0,0), 0.2)
 	topbar.Parent = main
 
+	-- Title
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1,-10,1,0)
+	title.Size = UDim2.new(1,-80,1,0)
 	title.Position = UDim2.new(0,10,0,0)
 	title.BackgroundTransparency = 1
 	title.Text = options.Title or "CMDX Window"
@@ -51,7 +49,18 @@ function CMDX:CreateWindow(options)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = topbar
 
-	-- Close
+	-- MINIMIZE BUTTON
+	local minimize = Instance.new("TextButton")
+	minimize.Size = UDim2.new(0,35,1,0)
+	minimize.Position = UDim2.new(1,-70,0,0)
+	minimize.Text = "-"
+	minimize.Font = Enum.Font.Code
+	minimize.TextSize = 16
+	minimize.TextColor3 = Color3.fromRGB(255,255,255)
+	minimize.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	minimize.Parent = topbar
+
+	-- CLOSE BUTTON
 	local close = Instance.new("TextButton")
 	close.Size = UDim2.new(0,35,1,0)
 	close.Position = UDim2.new(1,-35,0,0)
@@ -59,7 +68,7 @@ function CMDX:CreateWindow(options)
 	close.Font = Enum.Font.Code
 	close.TextSize = 16
 	close.TextColor3 = Color3.fromRGB(255,80,80)
-	close.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	close.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	close.Parent = topbar
 
 	close.MouseButton1Click:Connect(function()
@@ -73,73 +82,115 @@ function CMDX:CreateWindow(options)
 	container.BackgroundTransparency = 1
 	container.Parent = main
 
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = container
-	layout.Padding = UDim.new(0,8)
+	-- Scrolling history
+	local scrolling = Instance.new("ScrollingFrame")
+	scrolling.Size = UDim2.new(1,0,1,-45)
+	scrolling.CanvasSize = UDim2.new(0,0,0,0)
+	scrolling.ScrollBarThickness = 4
+	scrolling.BackgroundTransparency = 1
+	scrolling.Parent = container
 
-	-- 🔥 Register Command
+	local layout = Instance.new("UIListLayout")
+	layout.Parent = scrolling
+	layout.Padding = UDim.new(0,6)
+
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		scrolling.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 5)
+		scrolling.CanvasPosition = Vector2.new(0, scrolling.CanvasSize.Y.Offset)
+	end)
+
+	-- Command Box
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(1,0,0,40)
+	box.Position = UDim2.new(0,0,1,-40)
+	box.BackgroundColor3 = theme.MenuColor:Lerp(Color3.new(0,0,0), 0.3)
+	box.BorderSizePixel = 1
+	box.BorderColor3 = Color3.fromRGB(70,70,70)
+	box.TextColor3 = theme.TextColor
+	box.Font = Enum.Font.Code
+	box.TextSize = 16
+	box.PlaceholderText = "Digite comando..."
+	box.ClearTextOnFocus = false
+	box.Parent = container
+
+	-- Histórico visual
+	local function AddHistory(text)
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1,-5,0,25)
+		label.BackgroundTransparency = 1
+		label.TextWrapped = true
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Text = text
+		label.Font = Enum.Font.Code
+		label.TextSize = 14
+		label.TextColor3 = theme.TextColor
+		label.Parent = scrolling
+	end
+
+	box.FocusLost:Connect(function(enter)
+		if not enter then return end
+
+		local text = box.Text
+		local args = string.split(text, " ")
+		local cmd = args[1]
+
+		AddHistory("> "..text)
+
+		if Commands[cmd] then
+			Commands[cmd](args)
+		else
+			AddHistory("Comando não encontrado.")
+		end
+
+		box.Text = ""
+	end)
+
+	-- Register Command
 	function Window:RegisterCommand(name, callback)
 		Commands[name] = callback
 	end
 
-	-- 🔥 Command Box
-	function Window:CreateCommandBox(options)
+	-- Minimize logic
+	minimize.MouseButton1Click:Connect(function()
+		minimized = not minimized
 
-		local box = Instance.new("TextBox")
-		box.Size = UDim2.new(1,0,0,40)
-		box.BackgroundColor3 = theme.MenuColor:Lerp(Color3.new(0,0,0), 0.3)
-		box.BorderSizePixel = 1
-		box.BorderColor3 = Color3.fromRGB(70,70,70)
-		box.TextColor3 = theme.TextColor
-		box.Font = Enum.Font.Code
-		box.TextSize = 16
-		box.PlaceholderText = options.Placeholder or "Digite comando..."
-		box.ClearTextOnFocus = false
-		box.Parent = container
+		if minimized then
+			container.Visible = false
+			main.Size = UDim2.new(0,420,0,35)
+		else
+			container.Visible = true
+			main.Size = UDim2.new(0,420,0,260)
+		end
+	end)
 
-		box.FocusLost:Connect(function(enter)
-			if not enter then return end
-			
-			local text = box.Text
-			local args = string.split(text, " ")
-			local cmd = args[1]
+	-- DRAG SYSTEM
+	local dragging, dragStart, startPos
 
-			if Commands[cmd] then
-				Commands[cmd](args)
-			else
-				warn("Comando não encontrado:", cmd)
-			end
+	topbar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = main.Position
+		end
+	end)
 
-			box.Text = ""
-		end)
+	UIS.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+			main.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
 
-		return box
-	end
-
-	-- 🔥 Change Menu Color
-	function Window:SetMenuColor(color)
-		theme.MenuColor = color
-		main.BackgroundColor3 = color
-		topbar.BackgroundColor3 = color:Lerp(Color3.new(0,0,0), 0.2)
-	end
-
-	-- 🔥 Change Text Color
-	function Window:SetTextColor(color)
-		theme.TextColor = color
-		title.TextColor3 = color
-	end
-
-	-- 🔥 Change Script Name (ScreenGui)
-	function Window:SetScriptName(newName)
-		gui.Name = newName
-	end
-
-	-- 🔥 Change Window Title
-	function Window:SetTitle(newTitle)
-		title.Text = newTitle
-	end
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
 
 	return Window
 end
-
-return CMDX
