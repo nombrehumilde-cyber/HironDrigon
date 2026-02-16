@@ -1,0 +1,153 @@
+local HironLib = {}
+HironLib.__index = HironLib
+
+-- ===== DEFAULT THEME =====
+HironLib.Theme = {
+    Background = Color3.fromRGB(20,20,25),
+    Sidebar = Color3.fromRGB(25,25,30),
+    Accent = Color3.fromRGB(0,170,255),
+    Text = Color3.fromRGB(255,255,255),
+    Section = Color3.fromRGB(30,30,35)
+}
+
+-- ===== CREATE WINDOW =====
+function HironLib:CreateWindow(config)
+
+    local player = game.Players.LocalPlayer
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = player.PlayerGui
+    ScreenGui.Name = "HironLib"
+
+    -- MAIN
+    local Main = Instance.new("Frame")
+    Main.Size = UDim2.new(0, 700, 0, 400)
+    Main.Position = UDim2.new(0.5, -350, 0.5, -200)
+    Main.BackgroundColor3 = self.Theme.Background
+    Main.Parent = ScreenGui
+    Main.Active = true
+    Main.Draggable = true
+
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0,12)
+
+    -- SIDEBAR
+    local Sidebar = Instance.new("Frame")
+    Sidebar.Size = UDim2.new(0,180,1,0)
+    Sidebar.BackgroundColor3 = self.Theme.Sidebar
+    Sidebar.Parent = Main
+
+    Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0,12)
+
+    local SidebarLayout = Instance.new("UIListLayout", Sidebar)
+    SidebarLayout.Padding = UDim.new(0,8)
+
+    -- CONTENT
+    local Content = Instance.new("Frame")
+    Content.Size = UDim2.new(1,-180,1,0)
+    Content.Position = UDim2.new(0,180,0,0)
+    Content.BackgroundTransparency = 1
+    Content.Parent = Main
+
+    local Window = {}
+    Window.Tabs = {}
+
+    -- ===== TAB SYSTEM =====
+    function Window:CreateTab(name, iconId)
+
+        local TabButton = Instance.new("TextButton")
+        TabButton.Size = UDim2.new(1,-16,0,40)
+        TabButton.BackgroundColor3 = self.Theme.Section
+        TabButton.Text = "   "..name
+        TabButton.TextColor3 = HironLib.Theme.Text
+        TabButton.Parent = Sidebar
+
+        Instance.new("UICorner", TabButton).CornerRadius = UDim.new(0,8)
+
+        if iconId then
+            local Icon = Instance.new("ImageLabel")
+            Icon.Size = UDim2.new(0,20,0,20)
+            Icon.Position = UDim2.new(0,10,0.5,-10)
+            Icon.BackgroundTransparency = 1
+            Icon.Image = iconId
+            Icon.Parent = TabButton
+        end
+
+        local TabFrame = Instance.new("ScrollingFrame")
+        TabFrame.Size = UDim2.new(1,0,1,0)
+        TabFrame.CanvasSize = UDim2.new(0,0,0,0)
+        TabFrame.ScrollBarThickness = 4
+        TabFrame.Visible = false
+        TabFrame.Parent = Content
+        TabFrame.BackgroundTransparency = 1
+
+        local Layout = Instance.new("UIListLayout", TabFrame)
+        Layout.Padding = UDim.new(0,10)
+
+        Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            TabFrame.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y + 10)
+        end)
+
+        TabButton.MouseButton1Click:Connect(function()
+            for _,v in pairs(Window.Tabs) do
+                v.Frame.Visible = false
+            end
+            TabFrame.Visible = true
+        end)
+
+        local Tab = {}
+        Tab.Frame = TabFrame
+
+        -- ===== SECTION =====
+        function Tab:AddSection(title)
+            local Section = Instance.new("Frame")
+            Section.Size = UDim2.new(1,-20,0,35)
+            Section.BackgroundColor3 = HironLib.Theme.Section
+            Section.Parent = TabFrame
+
+            Instance.new("UICorner", Section).CornerRadius = UDim.new(0,8)
+
+            local Label = Instance.new("TextLabel")
+            Label.Size = UDim2.new(1,0,1,0)
+            Label.BackgroundTransparency = 1
+            Label.Text = title
+            Label.TextColor3 = HironLib.Theme.Text
+            Label.Parent = Section
+        end
+
+        -- ===== BUTTON =====
+        function Tab:AddButton(text, callback)
+            local Button = Instance.new("TextButton")
+            Button.Size = UDim2.new(1,-20,0,40)
+            Button.BackgroundColor3 = HironLib.Theme.Section
+            Button.Text = text
+            Button.TextColor3 = HironLib.Theme.Text
+            Button.Parent = TabFrame
+
+            Instance.new("UICorner", Button).CornerRadius = UDim.new(0,8)
+
+            Button.MouseButton1Click:Connect(function()
+                if callback then
+                    callback()
+                end
+            end)
+        end
+
+        Window.Tabs[name] = {Frame = TabFrame}
+        return Tab
+    end
+
+    -- ===== THEME EDITOR =====
+    function Window:SetTheme(newTheme)
+        for k,v in pairs(newTheme) do
+            if HironLib.Theme[k] then
+                HironLib.Theme[k] = v
+            end
+        end
+        Main.BackgroundColor3 = HironLib.Theme.Background
+        Sidebar.BackgroundColor3 = HironLib.Theme.Sidebar
+    end
+
+    return Window
+end
+
+return HironLib
