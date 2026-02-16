@@ -1,0 +1,145 @@
+-- // CMDX Advanced UI Library
+
+local CMDX = {}
+CMDX.__index = CMDX
+
+function CMDX:CreateWindow(options)
+
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+
+	local theme = {
+		MenuColor = options.MenuColor or Color3.fromRGB(25,25,25),
+		TextColor = options.TextColor or Color3.fromRGB(220,220,220)
+	}
+
+	local Commands = {}
+
+	local Window = {}
+	Window.Commands = Commands
+	Window.Theme = theme
+
+	-- GUI
+	local gui = Instance.new("ScreenGui")
+	gui.Name = options.Name or "CMDX_UI"
+	gui.ResetOnSpawn = false
+	gui.Parent = player:WaitForChild("PlayerGui")
+
+	-- Main Frame
+	local main = Instance.new("Frame")
+	main.Size = UDim2.new(0, 420, 0, 260)
+	main.Position = UDim2.new(0.5, -210, 0.5, -130)
+	main.BackgroundColor3 = theme.MenuColor
+	main.BorderSizePixel = 2
+	main.BorderColor3 = Color3.fromRGB(60,60,60)
+	main.Parent = gui
+
+	-- Topbar
+	local topbar = Instance.new("Frame")
+	topbar.Size = UDim2.new(1,0,0,35)
+	topbar.BackgroundColor3 = theme.MenuColor:Lerp(Color3.new(0,0,0), 0.2)
+	topbar.Parent = main
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1,-10,1,0)
+	title.Position = UDim2.new(0,10,0,0)
+	title.BackgroundTransparency = 1
+	title.Text = options.Title or "CMDX Window"
+	title.Font = Enum.Font.Code
+	title.TextSize = 16
+	title.TextColor3 = theme.TextColor
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.Parent = topbar
+
+	-- Close
+	local close = Instance.new("TextButton")
+	close.Size = UDim2.new(0,35,1,0)
+	close.Position = UDim2.new(1,-35,0,0)
+	close.Text = "X"
+	close.Font = Enum.Font.Code
+	close.TextSize = 16
+	close.TextColor3 = Color3.fromRGB(255,80,80)
+	close.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	close.Parent = topbar
+
+	close.MouseButton1Click:Connect(function()
+		gui:Destroy()
+	end)
+
+	-- Container
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1,-20,1,-50)
+	container.Position = UDim2.new(0,10,0,40)
+	container.BackgroundTransparency = 1
+	container.Parent = main
+
+	local layout = Instance.new("UIListLayout")
+	layout.Parent = container
+	layout.Padding = UDim.new(0,8)
+
+	-- 🔥 Register Command
+	function Window:RegisterCommand(name, callback)
+		Commands[name] = callback
+	end
+
+	-- 🔥 Command Box
+	function Window:CreateCommandBox(options)
+
+		local box = Instance.new("TextBox")
+		box.Size = UDim2.new(1,0,0,40)
+		box.BackgroundColor3 = theme.MenuColor:Lerp(Color3.new(0,0,0), 0.3)
+		box.BorderSizePixel = 1
+		box.BorderColor3 = Color3.fromRGB(70,70,70)
+		box.TextColor3 = theme.TextColor
+		box.Font = Enum.Font.Code
+		box.TextSize = 16
+		box.PlaceholderText = options.Placeholder or "Digite comando..."
+		box.ClearTextOnFocus = false
+		box.Parent = container
+
+		box.FocusLost:Connect(function(enter)
+			if not enter then return end
+			
+			local text = box.Text
+			local args = string.split(text, " ")
+			local cmd = args[1]
+
+			if Commands[cmd] then
+				Commands[cmd](args)
+			else
+				warn("Comando não encontrado:", cmd)
+			end
+
+			box.Text = ""
+		end)
+
+		return box
+	end
+
+	-- 🔥 Change Menu Color
+	function Window:SetMenuColor(color)
+		theme.MenuColor = color
+		main.BackgroundColor3 = color
+		topbar.BackgroundColor3 = color:Lerp(Color3.new(0,0,0), 0.2)
+	end
+
+	-- 🔥 Change Text Color
+	function Window:SetTextColor(color)
+		theme.TextColor = color
+		title.TextColor3 = color
+	end
+
+	-- 🔥 Change Script Name (ScreenGui)
+	function Window:SetScriptName(newName)
+		gui.Name = newName
+	end
+
+	-- 🔥 Change Window Title
+	function Window:SetTitle(newTitle)
+		title.Text = newTitle
+	end
+
+	return Window
+end
+
+return CMDX
