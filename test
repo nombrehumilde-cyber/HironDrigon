@@ -1,0 +1,53 @@
+local HironLib = {}
+HironLib.__index = HironLib
+
+-- ===== CREATE WINDOW =====
+function HironLib:CreateWindow(title)
+
+    local player = game.Players.LocalPlayer
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = player.PlayerGui
+
+    local Main = Instance.new("Frame")
+    Main.Size = UDim2.new(0, 400, 0, 300)
+    Main.Position = UDim2.new(0.5, -200, 0.5, -150)
+    Main.BackgroundColor3 = Color3.fromRGB(25,25,30)
+    Main.Parent = ScreenGui
+
+    local Window = {}
+    Window.Main = Main
+
+    -- ===== MAKE TAB =====
+    function Window:MakeTab(name)
+
+        local Tab = {}
+        Tab.Container = Instance.new("Frame")
+        Tab.Container.Size = UDim2.new(1,0,1,0)
+        Tab.Container.BackgroundTransparency = 1
+        Tab.Container.Parent = Main
+
+        -- ===== ADD BUTTON =====
+        function Tab:AddButton(text, callback)
+
+            local Button = Instance.new("TextButton")
+            Button.Size = UDim2.new(0,200,0,40)
+            Button.Position = UDim2.new(0,20,0,20)
+            Button.Text = text
+            Button.Parent = Tab.Container
+
+            Button.MouseButton1Click:Connect(function()
+                if callback then
+                    callback()
+                end
+            end)
+
+        end
+
+        return Tab
+    end
+
+    return Window
+end
+
+return HironLib
