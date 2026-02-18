@@ -25,12 +25,7 @@ end
 
 local InfoTab = Window:MakeTab({ Title = "Info", Icon = "rbxassetid://10723415903" })
 
-InfoTab:AddDiscordInvite({
-    Name = "HironDrigon",
-    Description = "Discord",
-    Logo = "rbxassetid://115421377734948",
-    Invite = "https://discord.gg/J3W7FCRD2D"
-})
+
 
 InfoTab:AddSection({ "Informações do Script" })
 InfoTab:AddParagraph({ "Owner / Developer:", "Owner: Medr0so_0 | sub-owner: Arthurfelipe_blox2" })
@@ -9500,13 +9495,382 @@ game:GetService("ReplicatedStorage").RE:FindFirstChild("1RPNam1eTex1t"):FireServ
 local function copyDiscordLink()
     setclipboard("https://discord.gg/JTxVVp33xD")
 end
--- ===== AVISO AO EXECUTAR =====
-Window:Dialog({
-Title = "Aviso do Hub",
-Text = "opa! você acabou de executar o HironDrigon Hub, divirta-se!",
-Options = {
-{"OK", function()
-print("Aviso fechado pelo jogador")
-end}
-}
+local Tab = Library:CreateTab("Skybox FE", 4483362458)
+
+Tab:CreateDropdown({
+    Name = "Camisas",
+    Options = {
+        "Scary",
+        "Hacker",
+        "Anonymous"
+    },
+    Callback = function(Selected)
+        local shirtId = nil
+        
+        if Selected == "Scary" then 
+            shirtId = 239959578
+        elseif Selected == "Hacker" then 
+            shirtId = 9567541545
+        elseif Selected == "Anonymous" then 
+            shirtId = 733789773
+        end
+        
+        if shirtId then
+            local args = {shirtId}
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WearShirt"):InvokeServer(unpack(args))
+            end)
+        end
+    end
+})
+
+Tab:CreateTextbox({
+    Name = "ID da Camisa",
+    PlaceholderText = "Insira o ID da camisa",
+    Callback = function(Value)
+        local shirtId = tonumber(Value)
+        if shirtId then
+            local args = {shirtId}
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WearShirt"):InvokeServer(unpack(args))
+            end)
+        end
+    end
+})
+
+_G.SkyboxActive = _G.SkyboxActive or false
+_G.CurrentTrack = _G.CurrentTrack or nil
+_G.RigidTrack = _G.RigidTrack or nil
+_G.savedBodyParts = _G.savedBodyParts or {}
+
+local SkyboxActive = _G.SkyboxActive
+local CurrentTrack = _G.CurrentTrack
+local RigidTrack = _G.RigidTrack
+local savedBodyParts = _G.savedBodyParts
+
+local function stopSkyboxAnimations()
+    if _G.RigidTrack then
+        pcall(function()
+            _G.RigidTrack:Stop()
+            _G.RigidTrack:Destroy()
+        end)
+        _G.RigidTrack = nil
+    end
+    
+    if _G.CurrentTrack then
+        pcall(function()
+            _G.CurrentTrack:Stop()
+            _G.CurrentTrack:Destroy()
+        end)
+        _G.CurrentTrack = nil
+    end
+    
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            local animator = humanoid:FindFirstChild("Animator")
+            if animator then
+                for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                    if track.Animation then
+                        local animId = track.Animation.AnimationId
+                        if animId == "rbxassetid://70883871260184" or animId == "rbxassetid://3695333486" then
+                            pcall(function()
+                                track:Stop()
+                            end)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+Tab:CreateToggle({
+    Name = "Skybox",
+    Default = _G.SkyboxActive or false,
+    Callback = function(value)
+        _G.SkyboxActive = value
+        
+        if value then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    local description = humanoid:GetAppliedDescription()
+                    
+                    _G.savedBodyParts = {
+                        Torso = description.Torso,
+                        RightArm = description.RightArm,
+                        LeftArm = description.LeftArm,
+                        RightLeg = description.RightLeg,
+                        LeftLeg = description.LeftLeg,
+                        Head = description.Head
+                    }
+                    
+                    task.wait(0.2)
+                    
+                    local yourBody = {
+                        [1] = 100839513065432,
+                        [2] = nil,
+                        [3] = nil,
+                        [4] = nil,
+                        [5] = nil,
+                        [6] = nil
+                    }
+                    
+                    local args = {
+                        [1] = yourBody
+                    }
+                    
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+                    end)
+                    
+                    task.wait(0.3)
+                    
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = "rbxassetid://70883871260184"
+                    
+                    _G.CurrentTrack = humanoid:LoadAnimation(newAnim)
+                    _G.CurrentTrack.Priority = Enum.AnimationPriority.Action4
+                    _G.CurrentTrack:Play(0.1, 1, 0.01)
+                    
+                    task.wait(0.5)
+                    
+                    local PlankingId = "rbxassetid://3695333486"
+                    local plankAnim = Instance.new("Animation")
+                    plankAnim.AnimationId = PlankingId
+                    _G.RigidTrack = humanoid:LoadAnimation(plankAnim)
+                    _G.RigidTrack.Priority = Enum.AnimationPriority.Movement
+                    _G.RigidTrack:Play(0.1, 1, 0)
+                end
+            end
+        else
+            stopSkyboxAnimations()
+            
+            task.wait(0.2)
+            
+            if next(_G.savedBodyParts) then
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                
+                if character then
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        local restoreBody = {
+                            [1] = _G.savedBodyParts.Torso,
+                            [2] = _G.savedBodyParts.RightArm,
+                            [3] = _G.savedBodyParts.LeftArm,
+                            [4] = _G.savedBodyParts.RightLeg,
+                            [5] = _G.savedBodyParts.LeftLeg,
+                            [6] = _G.savedBodyParts.Head
+                        }
+                        
+                        local args = {
+                            [1] = restoreBody
+                        }
+                        
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+                        end)
+                        
+                        _G.savedBodyParts = {}
+                    end
+                end
+            end
+        end
+    end
+})
+local Tab2 = Window:MakeTab({"Skybox FE", "sparkles"})
+
+Tab2:AddDropdown({
+    Name = "Camisas",
+    Description = "Selecione uma camisa pré-configurada",
+    Options = {
+        "Scary",
+        "Hacker",
+        "Anonymous"
+    },
+    Default = "Scary",
+    Callback = function(Selected)
+        local shirtId = nil
+        
+        if Selected == "Scary" then 
+            shirtId = 239959578
+        elseif Selected == "Hacker" then 
+            shirtId = 9567541545
+        elseif Selected == "Anonymous" then 
+            shirtId = 733789773
+        end
+        
+        if shirtId then
+            local args = {shirtId}
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WearShirt"):InvokeServer(unpack(args))
+            end)
+        end
+    end
+})
+
+Tab2:AddTextBox({
+    Name = "ID da Camisa",
+    Description = "Insira um ID customizado de camisa",
+    PlaceholderText = "Insira o ID da camisa",
+    Callback = function(Value)
+        local shirtId = tonumber(Value)
+        if shirtId then
+            local args = {shirtId}
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WearShirt"):InvokeServer(unpack(args))
+            end)
+        end
+    end
+})
+
+_G.SkyboxActive = _G.SkyboxActive or false
+_G.CurrentTrack = _G.CurrentTrack or nil
+_G.RigidTrack = _G.RigidTrack or nil
+_G.savedBodyParts = _G.savedBodyParts or {}
+
+local function stopSkyboxAnimations()
+    if _G.RigidTrack then
+        pcall(function()
+            _G.RigidTrack:Stop()
+            _G.RigidTrack:Destroy()
+        end)
+        _G.RigidTrack = nil
+    end
+    
+    if _G.CurrentTrack then
+        pcall(function()
+            _G.CurrentTrack:Stop()
+            _G.CurrentTrack:Destroy()
+        end)
+        _G.CurrentTrack = nil
+    end
+    
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            local animator = humanoid:FindFirstChild("Animator")
+            if animator then
+                for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                    if track.Animation then
+                        local animId = track.Animation.AnimationId
+                        if animId == "rbxassetid://70883871260184" or animId == "rbxassetid://3695333486" then
+                            pcall(function()
+                                track:Stop()
+                            end)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+Tab2:AddToggle({
+    Name = "Skybox",
+    Description = "Ativa a animação Skybox",
+    Default = false,
+    Callback = function(value)
+        _G.SkyboxActive = value
+        
+        if value then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    local description = humanoid:GetAppliedDescription()
+                    
+                    _G.savedBodyParts = {
+                        Torso = description.Torso,
+                        RightArm = description.RightArm,
+                        LeftArm = description.LeftArm,
+                        RightLeg = description.RightLeg,
+                        LeftLeg = description.LeftLeg,
+                        Head = description.Head
+                    }
+                    
+                    task.wait(0.2)
+                    
+                    local yourBody = {
+                        [1] = 100839513065432,
+                        [2] = nil,
+                        [3] = nil,
+                        [4] = nil,
+                        [5] = nil,
+                        [6] = nil
+                    }
+                    
+                    local args = {
+                        [1] = yourBody
+                    }
+                    
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+                    end)
+                    
+                    task.wait(0.3)
+                    
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = "rbxassetid://70883871260184"
+                    
+                    _G.CurrentTrack = humanoid:LoadAnimation(newAnim)
+                    _G.CurrentTrack.Priority = Enum.AnimationPriority.Action4
+                    _G.CurrentTrack:Play(0.1, 1, 0.01)
+                    
+                    task.wait(0.5)
+                    
+                    local PlankingId = "rbxassetid://3695333486"
+                    local plankAnim = Instance.new("Animation")
+                    plankAnim.AnimationId = PlankingId
+                    _G.RigidTrack = humanoid:LoadAnimation(plankAnim)
+                    _G.RigidTrack.Priority = Enum.AnimationPriority.Movement
+                    _G.RigidTrack:Play(0.1, 1, 0)
+                end
+            end
+        else
+            stopSkyboxAnimations()
+            
+            task.wait(0.2)
+            
+            if next(_G.savedBodyParts) then
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                
+                if character then
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        local restoreBody = {
+                            [1] = _G.savedBodyParts.Torso,
+                            [2] = _G.savedBodyParts.RightArm,
+                            [3] = _G.savedBodyParts.LeftArm,
+                            [4] = _G.savedBodyParts.RightLeg,
+                            [5] = _G.savedBodyParts.LeftLeg,
+                            [6] = _G.savedBodyParts.Head
+                        }
+                        
+                        local args = {
+                            [1] = restoreBody
+                        }
+                        
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+                        end)
+                        
+                        _G.savedBodyParts = {}
+                    end
+                end
+            end
+        end
+    end
 })
