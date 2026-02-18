@@ -4741,41 +4741,6 @@ local isBioActive = false
 local SectionRGBName = Tab:AddSection({
     Name = "NICK RGB"
 })
-local Section = Tab6:AddSection({""})
-
--- Velocidade controlada pelo slider (quanto maior, mais rápido)
-local rgbSpeed = 1
-
-Tab6:AddSlider({
-    Name = "Velocidade RGB",
-    Description = "Aumenta a velocidade do efeito RGB",
-    Min = 1,
-    Max = 5,
-    Increase = 1,
-    Default = 3,
-    Callback = function(Value)
-        rgbSpeed = Value
-    end
-})
-
--- Função para criar cor RGB suave com HSV
-local function getRainbowColor(speedMultiplier)
-    local h = (tick() * speedMultiplier % 5) / 5 -- gira o hue suavemente de 0 a 1
-    return Color3.fromHSV(h, 1, 1)
-end
-
--- Função para disparar eventos
-local function fireServer(eventName, args)
-    local event = game:GetService("ReplicatedStorage"):FindFirstChild("RE")
-    if event and event:FindFirstChild(eventName) then
-        pcall(function()
-            event[eventName]:FireServer(unpack(args))
-        end)
-    end
-end
-
-local Section = Tab:AddSection({"veiculos e casa"})
-
 
 Tab:AddToggle({
     Name = "NICK RGB",
