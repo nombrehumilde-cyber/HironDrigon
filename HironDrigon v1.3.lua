@@ -41,7 +41,7 @@ MainTab:Button({
 MainTab:Button({
     Title = "HironDrigon Brookhaven",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/nombrehumilde-cyber/HironDrigon/refs/heads/main/HironDrigon%20v1.2%20Desofuscado"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/nombrehumilde-cyber/HironDrigon/refs/heads/main/HironDrigon1"))()
     end
 })
 
