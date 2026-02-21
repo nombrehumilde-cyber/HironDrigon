@@ -1,0 +1,188 @@
+--// HironDrigon Library V1 - Real Library
+
+local TweenService = game:GetService("TweenService")
+
+local Library = {}
+Library.__index = Library
+
+-- Remove antiga
+if game.CoreGui:FindFirstChild("HironDrigonLibrary") then
+	game.CoreGui.HironDrigonLibrary:Destroy()
+end
+
+function Library:CreateWindow(title)
+
+	local Window = {}
+	Window.Tabs = {}
+
+	-- GUI
+	local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+	ScreenGui.Name = "HironDrigonLibrary"
+
+	local Main = Instance.new("Frame", ScreenGui)
+	Main.Size = UDim2.new(0, 540, 0, 330)
+	Main.Position = UDim2.new(0.5, -270, 0.5, -165)
+	Main.BackgroundColor3 = Color3.fromRGB(10,10,15)
+	Main.BorderSizePixel = 0
+	Main.Active = true
+	Main.Draggable = true
+	Instance.new("UICorner", Main).CornerRadius = UDim.new(0,16)
+
+	local Stroke = Instance.new("UIStroke", Main)
+	Stroke.Color = Color3.fromRGB(0,220,255)
+	Stroke.Transparency = 0.3
+
+	-- TOPBAR
+	local TopBar = Instance.new("Frame", Main)
+	TopBar.Size = UDim2.new(1,0,0,42)
+	TopBar.BackgroundColor3 = Color3.fromRGB(15,15,25)
+	TopBar.BorderSizePixel = 0
+	Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0,16)
+
+	local Title = Instance.new("TextLabel", TopBar)
+	Title.Size = UDim2.new(1,-120,1,0)
+	Title.Position = UDim2.new(0,25,0,0)
+	Title.Text = title
+	Title.Font = Enum.Font.GothamBold
+	Title.TextSize = 17
+	Title.TextColor3 = Color3.fromRGB(0,220,255)
+	Title.BackgroundTransparency = 1
+	Title.TextXAlignment = Enum.TextXAlignment.Left
+
+	-- CONTENT
+	local Content = Instance.new("Frame", Main)
+	Content.Size = UDim2.new(1,0,1,-42)
+	Content.Position = UDim2.new(0,0,0,42)
+	Content.BackgroundTransparency = 1
+
+	local TabHolder = Instance.new("Frame", Content)
+	TabHolder.Size = UDim2.new(0.28,0,1,0)
+	TabHolder.BackgroundColor3 = Color3.fromRGB(12,12,20)
+	Instance.new("UICorner", TabHolder).CornerRadius = UDim.new(0,14)
+
+	local OptionsHolder = Instance.new("Frame", Content)
+	OptionsHolder.Size = UDim2.new(0.72,0,1,0)
+	OptionsHolder.Position = UDim2.new(0.28,0,0,0)
+	OptionsHolder.BackgroundTransparency = 1
+
+	function Window:CreateTab(name)
+
+		local Tab = {}
+		Tab.Container = Instance.new("ScrollingFrame", OptionsHolder)
+		Tab.Container.Size = UDim2.new(1,0,1,0)
+		Tab.Container.CanvasSize = UDim2.new(0,0,0,0)
+		Tab.Container.ScrollBarThickness = 4
+		Tab.Container.ScrollBarImageColor3 = Color3.fromRGB(0,220,255)
+		Tab.Container.BackgroundTransparency = 1
+		Tab.Container.Visible = false
+
+		local Layout = Instance.new("UIListLayout", Tab.Container)
+		Layout.Padding = UDim.new(0,15)
+
+		Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			Tab.Container.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y + 20)
+		end)
+
+		-- TAB BUTTON
+		local TabButton = Instance.new("TextButton", TabHolder)
+		TabButton.Size = UDim2.new(1,-20,0,45)
+		TabButton.Position = UDim2.new(0,10,0,10 + (#Window.Tabs * 55))
+		TabButton.Text = name
+		TabButton.Font = Enum.Font.GothamBold
+		TabButton.TextSize = 15
+		TabButton.TextColor3 = Color3.fromRGB(0,220,255)
+		TabButton.BackgroundColor3 = Color3.fromRGB(18,18,30)
+		TabButton.AutoButtonColor = false
+		Instance.new("UICorner", TabButton).CornerRadius = UDim.new(0,12)
+
+		TabButton.MouseButton1Click:Connect(function()
+			for _, t in pairs(Window.Tabs) do
+				t.Container.Visible = false
+			end
+			Tab.Container.Visible = true
+		end)
+
+		table.insert(Window.Tabs, Tab)
+
+		if #Window.Tabs == 1 then
+			Tab.Container.Visible = true
+		end
+
+		-- BUTTON CREATION
+		function Tab:CreateButton(text, callback)
+			local Btn = Instance.new("TextButton", Tab.Container)
+			Btn.Size = UDim2.new(1,-35,0,50)
+			Btn.Text = text
+			Btn.Font = Enum.Font.GothamBold
+			Btn.TextSize = 15
+			Btn.TextColor3 = Color3.fromRGB(0,220,255)
+			Btn.BackgroundColor3 = Color3.fromRGB(15,15,25)
+			Btn.AutoButtonColor = false
+			Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,14)
+
+			Btn.MouseButton1Click:Connect(function()
+				if callback then
+					callback()
+				end
+			end)
+		end
+
+		-- TOGGLE CREATION
+		function Tab:CreateToggle(text, callback)
+			local Frame = Instance.new("Frame", Tab.Container)
+			Frame.Size = UDim2.new(1,-35,0,50)
+			Frame.BackgroundColor3 = Color3.fromRGB(15,15,25)
+			Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,14)
+
+			local Label = Instance.new("TextLabel", Frame)
+			Label.Size = UDim2.new(1,-100,1,0)
+			Label.Position = UDim2.new(0,25,0,0)
+			Label.Text = text
+			Label.Font = Enum.Font.GothamBold
+			Label.TextSize = 15
+			Label.TextColor3 = Color3.fromRGB(0,220,255)
+			Label.BackgroundTransparency = 1
+			Label.TextXAlignment = Enum.TextXAlignment.Left
+
+			local Toggle = Instance.new("TextButton", Frame)
+			Toggle.Size = UDim2.new(0,60,0,26)
+			Toggle.Position = UDim2.new(1,-90,0.5,-13)
+			Toggle.BackgroundColor3 = Color3.fromRGB(40,0,60)
+			Toggle.Text = ""
+			Toggle.AutoButtonColor = false
+			Instance.new("UICorner", Toggle).CornerRadius = UDim.new(1,0)
+
+			local Dot = Instance.new("Frame", Toggle)
+			Dot.Size = UDim2.new(0,22,0,22)
+			Dot.Position = UDim2.new(0,2,0.5,-11)
+			Dot.BackgroundColor3 = Color3.fromRGB(0,220,255)
+			Instance.new("UICorner", Dot).CornerRadius = UDim.new(1,0)
+
+			local state = false
+
+			Toggle.MouseButton1Click:Connect(function()
+				state = not state
+
+				if state then
+					TweenService:Create(Dot,TweenInfo.new(0.25),{
+						Position = UDim2.new(1,-24,0.5,-11)
+					}):Play()
+				else
+					TweenService:Create(Dot,TweenInfo.new(0.25),{
+						Position = UDim2.new(0,2,0.5,-11)
+					}):Play()
+				end
+
+				if callback then
+					callback(state)
+				end
+			end)
+		end
+
+		return Tab
+	end
+
+	return Window
+end
+
+return Library
