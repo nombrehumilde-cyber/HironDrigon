@@ -1,0 +1,274 @@
+-- Painel ADM Delta Executor com WindUI
+-- Original: ChatGPT 🚀
+-- Adaptado para WindUI
+
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Window = WindUI:CreateWindow({
+    Title = "Painel Trem Bala",
+    Icon = "shield",
+    Author = "by ChatGPT 🚀",
+    Folder = "PainelTremBala",
+    Size = UDim2.fromOffset(650, 500),
+    MinSize = Vector2.new(600, 400),
+    MaxSize = Vector2.new(900, 650),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 180,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = false,
+    ScrollBarEnabled = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+    },
+})
+
+local player = game.Players.LocalPlayer
+local PlayersTab = Window:Tab({ Title = "Jogadores", Icon = "users" })
+local ToolsTab = Window:Tab({ Title = "Ferramentas", Icon = "wrench" })
+
+-- ===================== NOTIFICAÇÕES =====================
+local function mostrarNotificacao(titulo, conteudo, tipo)
+    WindUI:Notify({
+        Title = titulo,
+        Content = conteudo,
+        Duration = 4,
+        Image = tipo or "info"
+    })
+end
+
+-- ===================== JAULA =====================
+local function criarJaula(targetPlayer)
+    if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+    local pos = targetPlayer.Character.HumanoidRootPart.Position
+
+    if workspace:FindFirstChild(targetPlayer.Name .. "_Jaula") then
+        workspace[targetPlayer.Name .. "_Jaula"]:Destroy()
+    end
+
+    local jaula = Instance.new("Model", workspace)
+    jaula.Name = targetPlayer.Name .. "_Jaula"
+
+    local tamanho, altura = 8, 10
+
+    local base = Instance.new("Part", jaula)
+    base.Size = Vector3.new(tamanho, 1, tamanho)
+    base.Position = pos + Vector3.new(0, -0.5, 0)
+    base.Anchored = true
+    base.Color = Color3.fromRGB(60, 60, 60)
+
+    local teto = base:Clone()
+    teto.Parent = jaula
+    teto.Position = pos + Vector3.new(0, altura, 0)
+
+    for i = -tamanho/2, tamanho/2, 2 do
+        for _, v in ipairs({
+            Vector3.new(i, altura/2, -tamanho/2),
+            Vector3.new(i, altura/2, tamanho/2),
+            Vector3.new(-tamanho/2, altura/2, i),
+            Vector3.new(tamanho/2, altura/2, i)
+        }) do
+            local barra = Instance.new("Part", jaula)
+            barra.Size = Vector3.new(0.3, altura, 0.3)
+            barra.Position = pos + v
+            barra.Anchored = true
+            barra.Color = Color3.fromRGB(200, 200, 200)
+        end
+    end
+
+    targetPlayer.Character:MoveTo(pos + Vector3.new(0, 2, 0))
+    if targetPlayer.Character:FindFirstChild("Humanoid") then
+        targetPlayer.Character.Humanoid.WalkSpeed = 0
+        targetPlayer.Character.Humanoid.JumpPower = 0
+    end
+    targetPlayer.Character.HumanoidRootPart.Anchored = true
+    mostrarNotificacao("Jaula", targetPlayer.Name .. " foi preso na jaula!", "warning")
+end
+
+local function removerJaula(targetPlayer)
+    if workspace:FindFirstChild(targetPlayer.Name .. "_Jaula") then
+        workspace[targetPlayer.Name .. "_Jaula"]:Destroy()
+    end
+    if targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+        targetPlayer.Character.Humanoid.WalkSpeed = 16
+        targetPlayer.Character.Humanoid.JumpPower = 50
+    end
+    if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        targetPlayer.Character.HumanoidRootPart.Anchored = false
+    end
+    mostrarNotificacao("Unjail", targetPlayer.Name .. " foi libertado!", "success")
+end
+
+-- ===================== GELO =====================
+local function criarGelo(targetPlayer)
+    if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+    
+    if workspace:FindFirstChild(targetPlayer.Name .. "_Gelo") then
+        workspace[targetPlayer.Name .. "_Gelo"]:Destroy()
+    end
+
+    local gelo = Instance.new("Part", workspace)
+    gelo.Name = targetPlayer.Name .. "_Gelo"
+    gelo.Size = Vector3.new(6, 10, 6)
+    gelo.Position = targetPlayer.Character.HumanoidRootPart.Position
+    gelo.Anchored = true
+    gelo.Material = Enum.Material.Ice
+    gelo.Transparency = 0.3
+    gelo.Color = Color3.fromRGB(150, 220, 255)
+
+    targetPlayer.Character:MoveTo(gelo.Position + Vector3.new(0, 2, 0))
+    if targetPlayer.Character:FindFirstChild("Humanoid") then
+        targetPlayer.Character.Humanoid.WalkSpeed = 0
+        targetPlayer.Character.Humanoid.JumpPower = 0
+    end
+    targetPlayer.Character.HumanoidRootPart.Anchored = true
+    mostrarNotificacao("Ice", targetPlayer.Name .. " foi congelado!", "info")
+end
+
+local function removerGelo(targetPlayer)
+    if workspace:FindFirstChild(targetPlayer.Name .. "_Gelo") then
+        workspace[targetPlayer.Name .. "_Gelo"]:Destroy()
+    end
+    if targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+        targetPlayer.Character.Humanoid.WalkSpeed = 16
+        targetPlayer.Character.Humanoid.JumpPower = 50
+    end
+    if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        targetPlayer.Character.HumanoidRootPart.Anchored = false
+    end
+    mostrarNotificacao("Unice", targetPlayer.Name .. " foi descongelado!", "success")
+end
+
+-- ===================== AÇÕES =====================
+local function criarPainelJogador(targetPlayer)
+    PlayersTab:Section({ Title = "👤 " .. targetPlayer.Name })
+    
+    PlayersTab:Button({
+        Title = "👢 Kick",
+        Callback = function()
+            if targetPlayer.Character then
+                task.delay(0.5, function()
+                    if targetPlayer.Character then
+                        targetPlayer.Character:Destroy()
+                    end
+                    mostrarNotificacao("Kick", targetPlayer.Name .. " foi kickado!", "warning")
+                end)
+            end
+        end
+    })
+
+    PlayersTab:Button({
+        Title = "🚫 Ban",
+        Callback = function()
+            if targetPlayer.Character then
+                task.delay(0.5, function()
+                    if targetPlayer.Character then
+                        targetPlayer.Character:Destroy()
+                    end
+                    targetPlayer.Parent = nil
+                    mostrarNotificacao("Ban", targetPlayer.Name .. " foi banido!", "error")
+                end)
+            end
+        end
+    })
+
+    PlayersTab:Button({
+        Title = "🔒 Jail",
+        Callback = function()
+            criarJaula(targetPlayer)
+        end
+    })
+
+    PlayersTab:Button({
+        Title = "🔓 Unjail",
+        Callback = function()
+            removerJaula(targetPlayer)
+        end
+    })
+
+    PlayersTab:Button({
+        Title = "🧊 Ice",
+        Callback = function()
+            criarGelo(targetPlayer)
+        end
+    })
+
+    PlayersTab:Button({
+        Title = "🔥 Unice",
+        Callback = function()
+            removerGelo(targetPlayer)
+        end
+    })
+
+    PlayersTab:Toggle({
+        Title = "❄️ Freeze",
+        Default = false,
+        Callback = function(v)
+            if targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+                if v then
+                    targetPlayer.Character.Humanoid.WalkSpeed = 0
+                    targetPlayer.Character.Humanoid.JumpPower = 0
+                    mostrarNotificacao("Freeze", targetPlayer.Name .. " foi congelado!", "info")
+                else
+                    targetPlayer.Character.Humanoid.WalkSpeed = 16
+                    targetPlayer.Character.Humanoid.JumpPower = 50
+                    mostrarNotificacao("Unfreeze", targetPlayer.Name .. " foi descongelado!", "success")
+                end
+            end
+        end
+    })
+end
+
+-- ===================== FERRAMENTAS =====================
+ToolsTab:Button({
+    Title = "🔄 Rejoin",
+    Callback = function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, player)
+    end
+})
+
+ToolsTab:Button({
+    Title = "💾 Salvar Posição",
+    Callback = function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            _G.SavedPos = player.Character.HumanoidRootPart.Position
+            mostrarNotificacao("Saved", "Posição salva!", "success")
+        end
+    end
+})
+
+ToolsTab:Button({
+    Title = "📍 Ir para Posição Salva",
+    Callback = function()
+        if _G.SavedPos and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character:MoveTo(_G.SavedPos)
+            mostrarNotificacao("Teleport", "Teletransportado!", "success")
+        else
+            mostrarNotificacao("Error", "Nenhuma posição salva!", "error")
+        end
+    end
+})
+
+-- ===================== SISTEMA DE JOGADORES =====================
+for _, p in ipairs(game.Players:GetPlayers()) do
+    criarPainelJogador(p)
+end
+
+game.Players.PlayerAdded:Connect(function(newPlayer)
+    task.wait(0.5)
+    criarPainelJogador(newPlayer)
+    mostrarNotificacao("Novo Jogador", newPlayer.Name .. " entrou no server!", "info")
+end)
+
+game.Players.PlayerRemoving:Connect(function(removedPlayer)
+    mostrarNotificacao("Saiu", removedPlayer.Name .. " saiu do server!", "warning")
+end)
+
+-- ===================== NOTIFICAÇÃO INICIAL =====================
+WindUI:Notify({
+    Title = "Painel Trem Bala 🇧🇷",
+    Content = "by ChatGPT 🚀 • Painel carregado com sucesso!",
+    Duration = 5,
+    Image = "success"
+})
