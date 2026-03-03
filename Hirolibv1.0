@@ -1,0 +1,582 @@
+-- FuturisticUI Library
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local FuturisticUI = {}
+FuturisticUI.__index = FuturisticUI
+
+-- Constantes de cores
+local COLORS = {
+    DARK_BG = Color3.fromRGB(15, 15, 25),
+    TOPBAR_BG = Color3.fromRGB(20, 20, 35),
+    SIDE_BG = Color3.fromRGB(18, 18, 30),
+    CONTENT_BG = Color3.fromRGB(25, 25, 40),
+    ACCENT = Color3.fromRGB(0, 255, 200),
+    TEXT_PRIMARY = Color3.fromRGB(255, 255, 255),
+    TEXT_SECONDARY = Color3.fromRGB(150, 150, 170),
+    BUTTON_BG = Color3.fromRGB(30, 30, 50),
+    INPUT_BG = Color3.fromRGB(25, 25, 45),
+}
+
+-- Função para criar uma nova instância da UI
+function FuturisticUI.new(config)
+    local self = setmetatable({}, FuturisticUI)
+    
+    self.config = {
+        title = config.title or "Futuristic Hub",
+        subtitle = config.subtitle or "by Otavio",
+        width = config.width or 500,
+        height = config.height or 350,
+    }
+    
+    self.tabs = {}
+    self.currentTab = nil
+    self.screenGui = nil
+    self.mainFrame = nil
+    self.minimized = false
+    
+    self:Initialize()
+    
+    return self
+end
+
+function FuturisticUI:Initialize()
+    local Player = game.Players.LocalPlayer
+    local PlayerGui = Player:WaitForChild("PlayerGui")
+    
+    -- Limpar UI anterior
+    if PlayerGui:FindFirstChild("FuturisticUI") then
+        PlayerGui.FuturisticUI:Destroy()
+    end
+    
+    -- Criar ScreenGui
+    self.screenGui = Instance.new("ScreenGui")
+    self.screenGui.Name = "FuturisticUI"
+    self.screenGui.ResetOnSpawn = false
+    self.screenGui.Parent = PlayerGui
+    
+    -- Frame Principal
+    self.mainFrame = Instance.new("Frame")
+    self.mainFrame.Parent = self.screenGui
+    self.mainFrame.Size = UDim2.new(0, self.config.width, 0, self.config.height)
+    self.mainFrame.Position = UDim2.new(0.5, -self.config.width/2, 0.5, -self.config.height/2)
+    self.mainFrame.BackgroundColor3 = COLORS.DARK_BG
+    self.mainFrame.BorderSizePixel = 0
+    Instance.new("UICorner", self.mainFrame).CornerRadius = UDim.new(0, 12)
+    
+    self:CreateTopBar()
+    self:CreateSide()
+    self:CreateContent()
+    self:SetupDragging()
+    self:SetupMinimize()
+end
+
+function FuturisticUI:CreateTopBar()
+    local TopBar = Instance.new("Frame", self.mainFrame)
+    TopBar.Name = "TopBar"
+    TopBar.Size = UDim2.new(1, 0, 0, 40)
+    TopBar.BackgroundColor3 = COLORS.TOPBAR_BG
+    TopBar.BorderSizePixel = 0
+    Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
+    
+    -- Title
+    local TitleLabel = Instance.new("TextLabel", TopBar)
+    TitleLabel.Size = UDim2.new(0.3, 0, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = self.config.title
+    TitleLabel.TextColor3 = COLORS.ACCENT
+    TitleLabel.TextScaled = true
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Subtitle
+    local SubTitleLabel = Instance.new("TextLabel", TopBar)
+    SubTitleLabel.Size = UDim2.new(0.25, 0, 1, 0)
+    SubTitleLabel.Position = UDim2.new(0.31, 5, 0, 0)
+    SubTitleLabel.BackgroundTransparency = 1
+    SubTitleLabel.Text = self.config.subtitle
+    SubTitleLabel.TextColor3 = COLORS.TEXT_SECONDARY
+    SubTitleLabel.TextScaled = true
+    SubTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Minimize Button
+    local MinimizeButton = Instance.new("TextButton", TopBar)
+    MinimizeButton.Name = "MinimizeButton"
+    MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
+    MinimizeButton.Position = UDim2.new(1, -90, 0, 0)
+    MinimizeButton.Text = "-"
+    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 120)
+    MinimizeButton.BackgroundColor3 = COLORS.BUTTON_BG
+    MinimizeButton.BorderSizePixel = 0
+    MinimizeButton.TextScaled = true
+    Instance.new("UICorner", MinimizeButton).CornerRadius = UDim.new(0, 8)
+    
+    -- Close Button
+    local CloseButton = Instance.new("TextButton", TopBar)
+    CloseButton.Name = "CloseButton"
+    CloseButton.Size = UDim2.new(0, 40, 0, 40)
+    CloseButton.Position = UDim2.new(1, -45, 0, 0)
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 70, 70)
+    CloseButton.BackgroundColor3 = COLORS.BUTTON_BG
+    CloseButton.BorderSizePixel = 0
+    CloseButton.TextScaled = true
+    Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
+    
+    self.topBar = TopBar
+    self.minimizeButton = MinimizeButton
+    self.closeButton = CloseButton
+    
+    CloseButton.MouseButton1Click:Connect(function()
+        self:ShowClosePopup()
+    end)
+end
+
+function FuturisticUI:CreateSide()
+    local Side = Instance.new("Frame", self.mainFrame)
+    Side.Name = "Side"
+    Side.Size = UDim2.new(0, 110, 1, -40)
+    Side.Position = UDim2.new(0, 0, 0, 40)
+    Side.BackgroundColor3 = COLORS.SIDE_BG
+    Side.BorderSizePixel = 0
+    
+    self.side = Side
+    self.sideButtons = {}
+end
+
+function FuturisticUI:CreateContent()
+    local Content = Instance.new("Frame", self.mainFrame)
+    Content.Name = "Content"
+    Content.Size = UDim2.new(1, -110, 1, -40)
+    Content.Position = UDim2.new(0, 110, 0, 40)
+    Content.BackgroundColor3 = COLORS.CONTENT_BG
+    Content.BorderSizePixel = 0
+    
+    self.content = Content
+end
+
+function FuturisticUI:AddTab(name, icon)
+    icon = icon or "rbxassetid://6031094678"
+    
+    -- Criar frame da tab
+    local TabFrame = Instance.new("Frame")
+    TabFrame.Name = name
+    TabFrame.Size = UDim2.new(1, 0, 1, 0)
+    TabFrame.BackgroundTransparency = 1
+    TabFrame.Visible = false
+    TabFrame.Parent = self.content
+    
+    -- Adicionar scroll
+    local ScrollingFrame = Instance.new("ScrollingFrame", TabFrame)
+    ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+    ScrollingFrame.BackgroundTransparency = 1
+    ScrollingFrame.BorderSizePixel = 0
+    ScrollingFrame.ScrollBarThickness = 8
+    ScrollingFrame.ScrollBarImageColor3 = COLORS.ACCENT
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    
+    local UIListLayout = Instance.new("UIListLayout", ScrollingFrame)
+    UIListLayout.Padding = UDim.new(0, 10)
+    UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    
+    UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    end)
+    
+    -- Criar botão lateral
+    local SideButton = Instance.new("TextButton", self.side)
+    SideButton.Size = UDim2.new(0, 100, 0, 40)
+    SideButton.Position = UDim2.new(0.5, -50, 0, #self.tabs * 50 + 20)
+    SideButton.BackgroundColor3 = COLORS.BUTTON_BG
+    SideButton.BorderSizePixel = 0
+    SideButton.Text = ""
+    Instance.new("UICorner", SideButton).CornerRadius = UDim.new(0, 6)
+    
+    local IconLabel = Instance.new("ImageLabel", SideButton)
+    IconLabel.Size = UDim2.new(0, 20, 0, 20)
+    IconLabel.Position = UDim2.new(0, 8, 0.5, -10)
+    IconLabel.BackgroundTransparency = 1
+    IconLabel.Image = icon
+    IconLabel.ImageColor3 = COLORS.ACCENT
+    
+    local Label = Instance.new("TextLabel", SideButton)
+    Label.Size = UDim2.new(1, -35, 1, 0)
+    Label.Position = UDim2.new(0, 30, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = name
+    Label.TextColor3 = COLORS.ACCENT
+    Label.TextScaled = true
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    SideButton.MouseButton1Click:Connect(function()
+        self:OpenTab(name)
+    end)
+    
+    self.tabs[name] = {
+        frame = TabFrame,
+        scrollingFrame = ScrollingFrame,
+        listLayout = UIListLayout,
+        button = SideButton,
+        elements = {}
+    }
+    
+    if not self.currentTab then
+        self:OpenTab(name)
+    end
+end
+
+function FuturisticUI:OpenTab(name)
+    for tabName, tabData in pairs(self.tabs) do
+        tabData.frame.Visible = (tabName == name)
+    end
+    self.currentTab = name
+end
+
+function FuturisticUI:AddButton(tabName, text, callback)
+    local tab = self.tabs[tabName]
+    if not tab then return end
+    
+    local Button = Instance.new("TextButton", tab.scrollingFrame)
+    Button.Size = UDim2.new(0.9, 0, 0, 35)
+    Button.Text = text
+    Button.BackgroundColor3 = COLORS.BUTTON_BG
+    Button.TextColor3 = COLORS.TEXT_PRIMARY
+    Button.TextScaled = true
+    Button.BorderSizePixel = 2
+    Button.BorderColor3 = COLORS.ACCENT
+    Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 8)
+    
+    Button.MouseButton1Click:Connect(callback)
+    
+    table.insert(tab.elements, Button)
+end
+
+function FuturisticUI:AddToggle(tabName, label, callback)
+    local tab = self.tabs[tabName]
+    if not tab then return end
+    
+    local ToggleFrame = Instance.new("Frame", tab.scrollingFrame)
+    ToggleFrame.Size = UDim2.new(0.9, 0, 0, 35)
+    ToggleFrame.BackgroundColor3 = COLORS.BUTTON_BG
+    ToggleFrame.BorderSizePixel = 2
+    ToggleFrame.BorderColor3 = COLORS.ACCENT
+    Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 8)
+    
+    local ToggleLabel = Instance.new("TextLabel", ToggleFrame)
+    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Text = label
+    ToggleLabel.TextColor3 = COLORS.TEXT_PRIMARY
+    ToggleLabel.TextScaled = true
+    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local ToggleBox = Instance.new("Frame", ToggleFrame)
+    ToggleBox.Size = UDim2.new(0, 25, 0, 25)
+    ToggleBox.Position = UDim2.new(1, -35, 0.5, -12)
+    ToggleBox.BackgroundColor3 = COLORS.INPUT_BG
+    ToggleBox.BorderSizePixel = 2
+    ToggleBox.BorderColor3 = COLORS.ACCENT
+    Instance.new("UICorner", ToggleBox).CornerRadius = UDim.new(0, 4)
+    
+    local ToggleIndicator = Instance.new("Frame", ToggleBox)
+    ToggleIndicator.Size = UDim2.new(0, 0, 1, 0)
+    ToggleIndicator.Position = UDim2.new(0, 0, 0, 0)
+    ToggleIndicator.BackgroundColor3 = COLORS.ACCENT
+    Instance.new("UICorner", ToggleIndicator).CornerRadius = UDim.new(0, 4)
+    
+    local toggled = false
+    
+    local function UpdateToggle()
+        local goal = toggled and UDim2.new(1, 0, 1, 0) or UDim2.new(0, 0, 1, 0)
+        TweenService:Create(ToggleIndicator, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = goal}):Play()
+    end
+    
+    local function OnToggle()
+        toggled = not toggled
+        UpdateToggle()
+        if callback then callback(toggled) end
+    end
+    
+    ToggleFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            OnToggle()
+        end
+    end)
+    
+    table.insert(tab.elements, ToggleFrame)
+end
+
+function FuturisticUI:AddSlider(tabName, label, min, max, default, callback)
+    local tab = self.tabs[tabName]
+    if not tab then return end
+    
+    local SliderFrame = Instance.new("Frame", tab.scrollingFrame)
+    SliderFrame.Size = UDim2.new(0.9, 0, 0, 50)
+    SliderFrame.BackgroundTransparency = 1
+    
+    local SliderLabel = Instance.new("TextLabel", SliderFrame)
+    SliderLabel.Size = UDim2.new(1, 0, 0, 20)
+    SliderLabel.Position = UDim2.new(0, 0, 0, 0)
+    SliderLabel.BackgroundTransparency = 1
+    SliderLabel.Text = label
+    SliderLabel.TextColor3 = COLORS.TEXT_PRIMARY
+    SliderLabel.TextScaled = true
+    SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local SliderBar = Instance.new("Frame", SliderFrame)
+    SliderBar.Size = UDim2.new(1, -50, 0, 8)
+    SliderBar.Position = UDim2.new(0, 0, 0, 30)
+    SliderBar.BackgroundColor3 = COLORS.INPUT_BG
+    SliderBar.BorderSizePixel = 0
+    Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(0, 4)
+    
+    local Fill = Instance.new("Frame", SliderBar)
+    Fill.Size = UDim2.new(0, 0, 1, 0)
+    Fill.Position = UDim2.new(0, 0, 0, 0)
+    Fill.BackgroundColor3 = COLORS.ACCENT
+    Instance.new("UICorner", Fill).CornerRadius = UDim.new(0, 4)
+    
+    local ValueLabel = Instance.new("TextLabel", SliderFrame)
+    ValueLabel.Size = UDim2.new(0, 40, 0, 8)
+    ValueLabel.Position = UDim2.new(1, -40, 0, 30)
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Text = tostring(default)
+    ValueLabel.TextColor3 = COLORS.ACCENT
+    ValueLabel.TextScaled = true
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Center
+    ValueLabel.TextYAlignment = Enum.TextYAlignment.Center
+    
+    local dragging = false
+    local currentValue = default
+    
+    local function UpdateSlider(inputPosX)
+        local relative = math.clamp((inputPosX - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+        currentValue = math.floor(min + (max - min) * relative)
+        ValueLabel.Text = tostring(currentValue)
+        TweenService:Create(Fill, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(relative, 0, 1, 0)}):Play()
+        if callback then callback(currentValue) end
+    end
+    
+    SliderBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            UpdateSlider(input.Position.X)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(input.Position.X)
+        end
+    end)
+    
+    table.insert(tab.elements, SliderFrame)
+end
+
+function FuturisticUI:AddTextbox(tabName, label, placeholder, callback)
+    local tab = self.tabs[tabName]
+    if not tab then return end
+    
+    local TextBoxFrame = Instance.new("Frame", tab.scrollingFrame)
+    TextBoxFrame.Size = UDim2.new(0.9, 0, 0, 35)
+    TextBoxFrame.BackgroundTransparency = 1
+    
+    local TextBoxLabel = Instance.new("TextLabel", TextBoxFrame)
+    TextBoxLabel.Size = UDim2.new(0.4, 0, 1, 0)
+    TextBoxLabel.Position = UDim2.new(0, 0, 0, 0)
+    TextBoxLabel.BackgroundTransparency = 1
+    TextBoxLabel.Text = label
+    TextBoxLabel.TextColor3 = COLORS.TEXT_PRIMARY
+    TextBoxLabel.TextScaled = true
+    TextBoxLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local InputBox = Instance.new("TextBox", TextBoxFrame)
+    InputBox.Size = UDim2.new(0.55, 0, 1, 0)
+    InputBox.Position = UDim2.new(0.45, 0, 0, 0)
+    InputBox.BackgroundColor3 = COLORS.INPUT_BG
+    InputBox.BorderSizePixel = 2
+    InputBox.BorderColor3 = COLORS.ACCENT
+    InputBox.Text = ""
+    InputBox.PlaceholderText = placeholder
+    InputBox.TextColor3 = COLORS.TEXT_PRIMARY
+    InputBox.TextScaled = true
+    Instance.new("UICorner", InputBox).CornerRadius = UDim.new(0, 6)
+    
+    InputBox.FocusLost:Connect(function(enterPressed)
+        if callback then callback(InputBox.Text) end
+    end)
+    
+    table.insert(tab.elements, TextBoxFrame)
+end
+
+function FuturisticUI:AddDropdown(tabName, label, options, callback)
+    local tab = self.tabs[tabName]
+    if not tab then return end
+    
+    local DropdownFrame = Instance.new("Frame", tab.scrollingFrame)
+    DropdownFrame.Size = UDim2.new(0.9, 0, 0, 35)
+    DropdownFrame.BackgroundTransparency = 1
+    
+    local DropdownLabel = Instance.new("TextLabel", DropdownFrame)
+    DropdownLabel.Size = UDim2.new(0.4, 0, 1, 0)
+    DropdownLabel.Position = UDim2.new(0, 0, 0, 0)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Text = label
+    DropdownLabel.TextColor3 = COLORS.TEXT_PRIMARY
+    DropdownLabel.TextScaled = true
+    DropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local Box = Instance.new("TextButton", DropdownFrame)
+    Box.Size = UDim2.new(0.55, 0, 1, 0)
+    Box.Position = UDim2.new(0.45, 0, 0, 0)
+    Box.BackgroundColor3 = COLORS.INPUT_BG
+    Box.BorderSizePixel = 2
+    Box.BorderColor3 = COLORS.ACCENT
+    Box.Text = "Selecione..."
+    Box.TextColor3 = COLORS.TEXT_PRIMARY
+    Box.TextScaled = true
+    Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 6)
+    
+    local OptionsFrame = Instance.new("Frame", self.screenGui)
+    OptionsFrame.Size = UDim2.new(0, Box.AbsoluteSize.X, 0, 0)
+    OptionsFrame.Position = Box.AbsolutePosition + Vector2.new(0, Box.AbsoluteSize.Y)
+    OptionsFrame.BackgroundColor3 = COLORS.TOPBAR_BG
+    OptionsFrame.BorderSizePixel = 2
+    OptionsFrame.BorderColor3 = COLORS.ACCENT
+    Instance.new("UICorner", OptionsFrame).CornerRadius = UDim.new(0, 6)
+    OptionsFrame.ClipsDescendants = true
+    OptionsFrame.ZIndex = 10
+    
+    local optionHeight = 30
+    
+    for i, opt in ipairs(options) do
+        local optBtn = Instance.new("TextButton", OptionsFrame)
+        optBtn.Size = UDim2.new(1, 0, 0, optionHeight)
+        optBtn.Position = UDim2.new(0, 0, 0, (i-1)*optionHeight)
+        optBtn.BackgroundColor3 = COLORS.INPUT_BG
+        optBtn.BorderSizePixel = 0
+        optBtn.Text = opt
+        optBtn.TextColor3 = COLORS.TEXT_PRIMARY
+        optBtn.TextScaled = true
+        Instance.new("UICorner", optBtn).CornerRadius = UDim.new(0, 6)
+        
+        optBtn.MouseButton1Click:Connect(function()
+            Box.Text = opt
+            TweenService:Create(OptionsFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(OptionsFrame.Size.X.Scale, OptionsFrame.Size.X.Offset, 0, 0)}):Play()
+            if callback then callback(opt) end
+        end)
+    end
+    
+    local open = false
+    Box.MouseButton1Click:Connect(function()
+        open = not open
+        OptionsFrame.Position = Box.AbsolutePosition + Vector2.new(0, Box.AbsoluteSize.Y)
+        local goalSize = open and UDim2.new(OptionsFrame.Size.X.Scale, OptionsFrame.Size.X.Offset, 0, #options*optionHeight) or UDim2.new(OptionsFrame.Size.X.Scale, OptionsFrame.Size.X.Offset, 0, 0)
+        TweenService:Create(OptionsFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = goalSize}):Play()
+    end)
+    
+    table.insert(tab.elements, DropdownFrame)
+end
+
+function FuturisticUI:SetupDragging()
+    local dragging = false
+    local dragStart, startPos
+    
+    self.topBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = self.mainFrame.Position
+        end
+    end)
+    
+    self.topBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            self.mainFrame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+function FuturisticUI:SetupMinimize()
+    self.minimizeButton.MouseButton1Click:Connect(function()
+        self.minimized = not self.minimized
+        if self.minimized then
+            self.side.Visible = false
+            self.content.Visible = false
+            TweenService:Create(self.mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, self.config.width, 0, 40)
+            }):Play()
+        else
+            self.side.Visible = true
+            self.content.Visible = true
+            TweenService:Create(self.mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, self.config.width, 0, self.config.height)
+            }):Play()
+        end
+    end)
+end
+
+function FuturisticUI:ShowClosePopup()
+    local Popup = Instance.new("Frame", self.mainFrame)
+    Popup.Size = UDim2.new(0, 300, 0, 150)
+    Popup.Position = UDim2.new(0.5, -150, 0.5, -75)
+    Popup.BackgroundColor3 = COLORS.TOPBAR_BG
+    Popup.BorderSizePixel = 0
+    Instance.new("UICorner", Popup).CornerRadius = UDim.new(0, 10)
+    
+    local PopupText = Instance.new("TextLabel", Popup)
+    PopupText.Size = UDim2.new(1, 0, 0, 50)
+    PopupText.Position = UDim2.new(0, 0, 0, 20)
+    PopupText.Text = "Deseja fechar a UI?"
+    PopupText.TextScaled = true
+    PopupText.TextColor3 = COLORS.TEXT_PRIMARY
+    PopupText.BackgroundTransparency = 1
+    
+    local CloseConfirm = Instance.new("TextButton", Popup)
+    CloseConfirm.Size = UDim2.new(0, 120, 0, 40)
+    CloseConfirm.Position = UDim2.new(0.1, 0, 1, -60)
+    CloseConfirm.Text = "FECHAR"
+    CloseConfirm.TextColor3 = Color3.fromRGB(255, 80, 80)
+    CloseConfirm.BackgroundColor3 = Color3.fromRGB(35, 15, 15)
+    CloseConfirm.TextScaled = true
+    CloseConfirm.BorderSizePixel = 2
+    CloseConfirm.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    
+    local CancelConfirm = Instance.new("TextButton", Popup)
+    CancelConfirm.Size = UDim2.new(0, 120, 0, 40)
+    CancelConfirm.Position = UDim2.new(0.55, 0, 1, -60)
+    CancelConfirm.Text = "CANCELAR"
+    CancelConfirm.TextColor3 = Color3.fromRGB(80, 255, 120)
+    CancelConfirm.BackgroundColor3 = Color3.fromRGB(15, 35, 15)
+    CancelConfirm.TextScaled = true
+    CancelConfirm.BorderSizePixel = 2
+    CancelConfirm.BorderColor3 = Color3.fromRGB(0, 255, 0)
+    
+    CloseConfirm.MouseButton1Click:Connect(function()
+        self.screenGui:Destroy()
+    end)
+    
+    CancelConfirm.MouseButton1Click:Connect(function()
+        Popup:Destroy()
+    end)
+end
+
+return FuturisticUI
