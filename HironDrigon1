@@ -1,5 +1,5 @@
 
-local Libary = loadstring(game:HttpGet("https://pastefy.app/TYVuPNOS/raw"))()
+local Libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/losaztecas859-commits/Redz-library-v5.docs/refs/heads/main/testee2.lua"))()
 workspace.FallenPartsDestroyHeight = -math.huge
 
 local Window = Libary:MakeWindow({
@@ -3746,158 +3746,308 @@ workspace.CurrentCamera.CameraSubject=game.Players.LocalPlayer.Character:WaitFor
 
 local Tab = Window:MakeTab({"Avatar", "rbxassetid://10734952036"})
 
+-- ========================================================================
+--                  Copiar Skin (de outro player)
+-- ========================================================================
+
 Tab:AddSection({ Name = "Copiar Skin" })
-
-
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 
 local Target = nil
+local valor_do_nome_do_jogador
 
--- FunÃ§Ã£o para obter os CHAOSs dos jogadores
+-- Função pra pegar nomes dos players (exclui o localplayer pra não dar merda)
 local function GetPlayerNames()
-    local PlayerNames = {}
+    local nomes = {}
     for _, player in ipairs(Players:GetPlayers()) do
-        table.insert(PlayerNames, player.Name)
+        if player ~= Players.LocalPlayer then
+            table.insert(nomes, player.Name)
+        end
     end
-    return PlayerNames
+    return nomes
 end
 
--- Dropdown de seleÃ§Ã£o de jogador
+-- Dropdown de seleção de jogador
 local Dropdown = Tab:AddDropdown({
-    Name = "Selecionar Jogador",
+    Name = "Selecionar Jogador pra Copiar",
     Options = GetPlayerNames(),
-    Default = Target,
+    Default = "",
     Callback = function(Value)
         Target = Value
+        valor_do_nome_do_jogador = Value
+        print("Alvo selecionado: " .. (Target or "Nenhum, seu animal"))
     end
 })
 
--- Atualiza opÃ§Ãµes do dropdown quando alguÃ©m entra ou sai
-local function UpdateDropdown()
-    Dropdown:Refresh(GetPlayerNames(), true)
+-- Função pra atualizar a lista automaticamente
+local function UpdatePlayerList()
+    Dropdown:Set(GetPlayerNames())
 end
 
-Players.PlayerAdded:Connect(UpdateDropdown)
-Players.PlayerRemoving:Connect(UpdateDropdown)
+UpdatePlayerList()
 
+-- Botão pra atualizar manualmente
 Tab:AddButton({
-    Name = "Copiar Avatar",
+    Name = "Atualizar Lista de Jogadores",
     Callback = function()
-        if not Target then return end
+        UpdatePlayerList()
+    end
+})
+
+-- Conecta eventos de player entrando/saindo
+Players.PlayerAdded:Connect(UpdatePlayerList)
+Players.PlayerRemoving:Connect(UpdatePlayerList)
+
+-- Botão principal pra COPIAR A SKIN
+Tab:AddButton({
+    Name = "Copiar Skin do Selecionado",
+    Callback = function()
+        if not Target then 
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Erro",
+                Text = "Seleciona um player primeiro",
+                Duration = 5
+            })
+            return 
+        end
 
         local LP = Players.LocalPlayer
-        local LChar = LP.Character
+        local LChar = LP.Character or LP.CharacterAdded:Wait()
         local TPlayer = Players:FindFirstChild(Target)
 
         if TPlayer and TPlayer.Character then
-            local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+            local LHumanoid = LChar:FindFirstChildOfClass("Humanoid")
             local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
 
             if LHumanoid and THumanoid then
-                -- RESETAR LOCALPLAYER
+                -- Resetar avatar local (tirar tudo que tá equipado)
                 local LDesc = LHumanoid:GetAppliedDescription()
-
-                -- Remover acessÃ³rios, roupas e face atuais
                 for _, acc in ipairs(LDesc:GetAccessories(true)) do
-                    if acc.AssetId and tonumber(acc.AssetId) then
+                    if acc.AssetId then
                         Remotes.Wear:InvokeServer(tonumber(acc.AssetId))
+                        task.wait(0.15)
+                    end
+                end
+                if tonumber(LDesc.Shirt) then Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt)) task.wait(0.15) end
+                if tonumber(LDesc.Pants) then Remotes.Wear:InvokeServer(tonumber(LDesc.Pants)) task.wait(0.15) end
+                if tonumber(LDesc.Face) then Remotes.Wear:InvokeServer(tonumber(LDesc.Face)) task.wait(0.15) end
+
+                -- Pegar descrição do alvo
+                local PDesc = THumanoid:GetAppliedDescription()
+
+                -- Mudar partes do corpo
+                local argsBody = {
+                    [1] = {
+                        PDesc.Torso or 0,
+                        PDesc.RightArm or 0,
+                        PDesc.LeftArm or 0,
+                        PDesc.RightLeg or 0,
+                        PDesc.LeftLeg or 0,
+                        PDesc.Head or 0
+                    }
+                }
+                Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+                task.wait(0.4)
+
+                -- Vestir camisa, calça, face
+                if tonumber(PDesc.Shirt) then Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt)) task.wait(0.2) end
+                if tonumber(PDesc.Pants) then Remotes.Wear:InvokeServer(tonumber(PDesc.Pants)) task.wait(0.2) end
+                if tonumber(PDesc.Face) then Remotes.Wear:InvokeServer(tonumber(PDesc.Face)) task.wait(0.2) end
+
+                -- Acessórios do alvo
+                for _, v in ipairs(PDesc:GetAccessories(true)) do
+                    if v.AssetId then
+                        Remotes.Wear:InvokeServer(tonumber(v.AssetId))
                         task.wait(0.2)
                     end
                 end
 
-                if tonumber(LDesc.Shirt) then
-                    Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt))
-                    task.wait(0.2)
-                end
-
-                if tonumber(LDesc.Pants) then
-                    Remotes.Wear:InvokeServer(tonumber(LDesc.Pants))
-                    task.wait(0.2)
-                end
-
-                if tonumber(LDesc.Face) then
-                    Remotes.Wear:InvokeServer(tonumber(LDesc.Face))
-                    task.wait(0.2)
-                end
-
-                -- COPIAR DO JOGADOR ALVO
-                local PDesc = THumanoid:GetAppliedDescription()
-
-                -- Enviar partes do corpo
-                local argsBody = {
-                    [1] = {
-                        [1] = PDesc.Torso,
-                        [2] = PDesc.RightArm,
-                        [3] = PDesc.LeftArm,
-                        [4] = PDesc.RightLeg,
-                        [5] = PDesc.LeftLeg,
-                        [6] = PDesc.Head
-                    }
-                }
-                Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
-                task.wait(0.5)
-
-                if tonumber(PDesc.Shirt) then
-                    Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt))
-                    task.wait(0.3)
-                end
-
-                if tonumber(PDesc.Pants) then
-                    Remotes.Wear:InvokeServer(tonumber(PDesc.Pants))
-                    task.wait(0.3)
-                end
-
-                if tonumber(PDesc.Face) then
-                    Remotes.Wear:InvokeServer(tonumber(PDesc.Face))
-                    task.wait(0.3)
-                end
-
-                for _, v in ipairs(PDesc:GetAccessories(true)) do
-                    if v.AssetId and tonumber(v.AssetId) then
-                        Remotes.Wear:InvokeServer(tonumber(v.AssetId))
-                        task.wait(0.3)
-                    end
-                end
-
+                -- Cor do corpo
                 local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
                 if SkinColor then
                     Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
                     task.wait(0.3)
                 end
 
+                -- Animação idle se tiver
                 if tonumber(PDesc.IdleAnimation) then
                     Remotes.Wear:InvokeServer(tonumber(PDesc.IdleAnimation))
-                    task.wait(0.3)
+                    task.wait(0.2)
                 end
 
-                -- CHAOS, bio e cor
+                -- RP Name, Bio e cores (se o jogo tiver)
                 local Bag = TPlayer:FindFirstChild("PlayersBag")
                 if Bag then
                     if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
                         Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value)
-                        task.wait(0.3)
+                        task.wait(0.2)
                     end
                     if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
                         Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value)
-                        task.wait(0.3)
+                        task.wait(0.2)
                     end
                     if Bag:FindFirstChild("RPNameColor") then
                         Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value)
-                        task.wait(0.3)
+                        task.wait(0.2)
                     end
                     if Bag:FindFirstChild("RPBioColor") then
                         Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value)
-                        task.wait(0.3)
+                        task.wait(0.2)
                     end
                 end
+
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Sucesso, porra!",
+                    Text = "Copiou a skin do " .. Target .. "!",
+                    Duration = 6
+                })
             end
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Deu merda",
+                Text = "O player sumiu ou não tem character, tenta de novo.",
+                Duration = 5
+            })
         end
     end
 })
 
+-- ========================================================================
+--                  Roupas 3D / Acessórios 3D
+-- ========================================================================
+
+Tab:AddSection({"Roupas 3D / Acessórios 3D"})
+
+local AvatarManager = {}
+AvatarManager.ReplicatedStorage = ReplicatedStorage
+
+function AvatarManager:Notificar(msg)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "aviso",
+        Text = msg,
+        Duration = 5
+    })
+end
+
+AvatarManager.Avatares = {
+    { Nome = "Gato de Manga", ID = 124948425515124 },
+    { Nome = "Tung Saur", ID = 117098257036480 },
+    { Nome = "Tralaleiro", ID = 99459753608381 },
+    { Nome = "Monstro S.A", ID = 123609977175226 },
+    { Nome = "Trenzinho", ID = 80468697076178 },
+    { Nome = "Dino", ID = 11941741105 },
+    { Nome = "Pou idoso", ID = 15742966010  },
+    { Nome = "Coco/boxt@", ID = 77013984520332  },
+    { Nome = "Coelho", ID = 71797333686800  },
+    { Nome = "Hipopótamo", ID = 73215892129281 },
+    { Nome = "Ratatui", ID = 108557570415453 },
+    { Nome = "Galinha", ID = 71251793812515 },
+    { Nome = "Pepa pig", ID = 92979204778377 },
+    { Nome = "Pinguim", ID = 94944293759578 },
+    { Nome = "Sid", ID = 87442757321244 },
+    { Nome = "Puga grande", ID = 111436158728716 },
+    { Nome = "SHREK AMALDIÇOADO", ID = 120960401202173 },
+    { Nome = "Mosquito grande", ID = 108052868536435 },
+    { Nome = "Noob Invertido", ID = 106596990206151 },
+    { Nome = "Pato(a)", ID = 135132836238349 },
+    { Nome = "Cachorro Chihuahua", ID = 18656467256 },
+    { Nome = "Gato sla", ID = 18994959003 },
+    { Nome = "Gato fei", ID = 77506186615650 },
+    { Nome = "Inpostor", ID = 18234669337 },
+    { Nome = "Simon amarelo", ID = 75183593514657 },
+    { Nome = "Simon azul", ID = 76155710249925 }
+}
+
+function AvatarManager:GetNomes()
+    local t = {}
+    for _, v in ipairs(self.Avatares) do table.insert(t, v.Nome) end
+    return t
+end
+
+function AvatarManager:Equipar(nome)
+    for _, v in ipairs(self.Avatares) do
+        if v.Nome == nome then
+            local suc, err = pcall(function()
+                Remotes.Wear:InvokeServer(v.ID)
+            end)
+            if suc then
+                AvatarManager:Notificar("Equipou " .. nome .. ", foda pra caralho!")
+            else
+                AvatarManager:Notificar("Deu pau: " .. tostring(err))
+            end
+            return
+        end
+    end
+    AvatarManager:Notificar("Não achei")
+end
+
+Tab:AddDropdown({
+    Name = "Selecionar Acessório 3D",
+    Options = AvatarManager:GetNomes(),
+    Callback = function(val)
+        _G.Selected3D = val
+    end
+})
+
+Tab:AddButton({
+    Name = "Equipar Selecionado",
+    Callback = function()
+        if _G.Selected3D then
+            AvatarManager:Equipar(_G.Selected3D)
+        else
+            AvatarManager:Notificar("Escolhe alguma coisa ante")
+        end
+    end
+})
+
+-- ========================================================================
+--                  Avatar Editor / Mini Presets de Corpo
+-- ========================================================================
+
+Tab:AddSection({"Mini Presets de Corpo"})
+
+Tab:AddParagraph({
+    Title = "AVISO FODA",
+    Content = "Esses botões trocam as PARTES DO CORPO do teu avatar. Vai resetar o que tu tá usando agora, usa com cuidado, porra."
+})
+
+local function ApplyBodyPreset(ids)
+    local args = { [1] = ids }
+    Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+    print("Preset aplicado, vai ficar insano!")
+end
+
+Tab:AddButton({Name = "Mini REPO", Callback = function()
+    ApplyBodyPreset({117101023704825, 125767940563838, 137301494386930, 87357384184710, 133391239416999, 111818794467824})
+end})
+
+Tab:AddButton({Name = "Mini Garanhão", Callback = function()
+    ApplyBodyPreset({124355047456535, 120507500641962, 82273782655463, 113625313757230, 109182039511426, 0})
+end})
+
+Tab:AddButton({Name = "Stick", Callback = function()
+    ApplyBodyPreset({14731384498, 14731377938, 14731377894, 14731377875, 14731377941, 14731382899})
+end})
+
+Tab:AddButton({Name = "Chunky-Bug", Callback = function()
+    ApplyBodyPreset({15527827600, 15527827578, 15527831669, 15527836067, 15527827184, 15527827599})
+end})
+
+Tab:AddButton({Name = "Cursed-Spider", Callback = function()
+    ApplyBodyPreset({134555168634906, 100269043793774, 125607053187319, 122504853343598, 95907982259204, 91289185840375})
+end})
+
+Tab:AddButton({Name = "Possessed-Horror", Callback = function()
+    ApplyBodyPreset({122800511983371, 132465361516275, 125155800236527, 83070163355072, 102906187256945, 78311422507297})
+end})
+
+Tab:AddParagraph({
+    Title = "Mais vindo na próxima",
+    Content = "Vai ter RGB de corpo, invis total, mais presets do caralho. Aguenta aí que o Zé Pequeno tá cozinhando!"
+})
 -- Definir cores para o efeito RGB
 local colors = {
     Color3.new(1, 0, 0),       -- Vermelho
