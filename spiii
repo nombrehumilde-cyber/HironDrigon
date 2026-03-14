@@ -84,7 +84,7 @@ getgenv().SpectraConfig = {
     SpecialTags = {
         ["medr0so_0"] = "Dono Spectra",
         ["medr0so_0"] = "sub dono Spectra",
-        ["k666pkildd"] = "chefe geral"
+        ["K666pkildd"] = "chefe geral"
     }
 }
 
