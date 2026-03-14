@@ -1,0 +1,203 @@
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+task.wait(0.4)
+
+WindUI:SetTheme("Dark")
+
+local Window = WindUI:CreateWindow({
+    Title = "Spectra Admin - Painel Zé Pequeno",
+    Icon = "rbxassetid://97965813136525",
+    Author = "Feito na raça pro Zé Pequeno",
+    Folder = "SpectraZéPequeno",
+    Size = UDim2.fromOffset(520, 380),
+    Transparent = true,
+    SideBarWidth = 170,
+})
+
+Window:EditOpenButton({
+    Title = " ZÉ PEQUENO ADMIN ",
+    CornerRadius = UDim.new(0, 8),
+    StrokeThickness = 3,
+    Color = ColorSequence.new(
+        Color3.fromRGB(180, 0, 0),
+        Color3.fromRGB(220, 0, 0)
+    ),
+    Draggable = true
+})
+
+-- Serviços básicos que já estavam no teu script
+local Players        = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer    = Players.LocalPlayer
+
+local BoardRemote = nil
+local BoardCount  = nil
+
+-- Tenta achar o remote (igual teu script)
+pcall(function()
+    local re = ReplicatedStorage:FindFirstChild("RE")
+    if re then
+        BoardRemote = re:FindFirstChild("1Schoo1lDr1yBoard1s")
+    end
+    -- BoardCount também (se precisar)
+    local workspaceCom = workspace:FindFirstChild("WorkspaceCom")
+    if workspaceCom then
+        -- ... (pode manter a busca completa se quiser, mas aqui simplifiquei)
+        BoardCount = workspaceCom:FindFirstChild("Count", true) -- tentativa genérica
+    end
+end)
+
+local function EnviarComando(cmd, alvo)
+    local texto = ";" .. cmd
+    if alvo and alvo ~= "" then
+        texto = texto .. " " .. alvo:lower()
+    end
+
+    if BoardRemote then
+        BoardRemote:FireServer("ReturningBoardName", BoardCount, texto)
+        print("📤 Enviou pro board → " .. texto)
+    else
+        -- fallback chat
+        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+        if chatEvent and chatEvent:FindFirstChild("SayMessageRequest") then
+            chatEvent.SayMessageRequest:FireServer(texto, "All")
+            print("📨 Enviou via chat → " .. texto)
+        else
+            warn("Nem board nem chat event encontrado. Comando não enviado.")
+        end
+    end
+end
+
+-- =============================================
+--               INTERFACE
+-- =============================================
+
+local TabPrincipal = Window:Tab({ Title = "Admin", Icon = "shield" })
+
+local SecaoPlayers = TabPrincipal:Section({ Title = "Jogadores", Opened = true })
+
+local SelectedPlayer = nil
+local PlayerDropdown = nil
+
+local function AtualizarListaPlayers()
+    local lista = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(lista, plr.Name)
+        end
+    end
+    table.sort(lista)
+    if PlayerDropdown then
+        PlayerDropdown:Refresh(lista, true)
+    end
+end
+
+PlayerDropdown = SecaoPlayers:Dropdown({
+    Title = "Selecione o otário",
+    Values = {},
+    Multi = false,
+    Default = 1,
+    Callback = function(valor)
+        SelectedPlayer = valor
+        print("Alvo selecionado: " .. (valor or "ninguém"))
+    end
+})
+
+SecaoPlayers:Button({
+    Title = "Atualizar lista de players",
+    Callback = function()
+        AtualizarListaPlayers()
+        print("Lista atualizada, seu arrombado!")
+    end
+})
+
+-- Atualiza quando abre e quando alguém entra/sai
+task.spawn(function()
+    task.wait(0.8)
+    AtualizarListaPlayers()
+end)
+
+Players.PlayerAdded:Connect(function() task.delay(0.6, AtualizarListaPlayers) end)
+Players.PlayerRemoving:Connect(function() task.delay(0.6, AtualizarListaPlayers) end)
+
+-- =============================================
+--               COMANDOS
+-- =============================================
+
+local SecaoComandos = TabPrincipal:Section({ Title = "Comandos foda", Opened = true })
+
+SecaoComandos:Button({
+    Title = "KILL 🔪",
+    Callback = function()
+        if not SelectedPlayer then
+            print("Seleciona um filho da puta primeiro, porra!")
+            return
+        end
+        EnviarComando("kill", SelectedPlayer)
+    end
+})
+
+-- Toggles
+local jailAtivado = {}
+local freezeAtivado = {}
+local iceAtivado = {}
+
+SecaoComandos:Toggle({
+    Title = "Jail / Soltar",
+    Default = false,
+    Callback = function(ativado)
+        if not SelectedPlayer then
+            print("Escolhe alguém primeiro, seu burro do caralho!")
+            return
+        end
+
+        local nome = SelectedPlayer
+        if ativado then
+            EnviarComando("jail", nome)
+            jailAtivado[nome] = true
+            print("Jail ligado em " .. nome)
+        else
+            EnviarComando("unjail", nome)
+            jailAtivado[nome] = nil
+            print("Jail desligado em " .. nome)
+        end
+    end
+})
+
+SecaoComandos:Toggle({
+    Title = "Freeze / Unfreeze",
+    Default = false,
+    Callback = function(ativado)
+        if not SelectedPlayer then return end
+
+        local nome = SelectedPlayer
+        if ativado then
+            EnviarComando("freeze", nome)
+            freezeAtivado[nome] = true
+        else
+            EnviarComando("unfreeze", nome)
+            freezeAtivado[nome] = nil
+        end
+    end
+})
+
+SecaoComandos:Toggle({
+    Title = "Ice / Unice",
+    Default = false,
+    Callback = function(ativado)
+        if not SelectedPlayer then return end
+
+        local nome = SelectedPlayer
+        if ativado then
+            -- Aqui você pode trocar por outro comando se "ice" não existir no teu sistema
+            -- Por enquanto usando "freeze" como base, ou troca por "ice" se tiver
+            EnviarComando("freeze", nome)   -- ← altera aqui se tiver comando diferente
+            iceAtivado[nome] = true
+        else
+            EnviarComando("unfreeze", nome)
+            iceAtivado[nome] = nil
+        end
+    end
+})
+
+-- Finalzinho maroto
+print("Carregou o painel do Zé Pequeno, seu puto! Pode zuar à vontade.")
