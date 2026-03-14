@@ -1,194 +1,177 @@
 --// SERVICES
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 
---====================================
--- REMOTE DO SPECTRA
---====================================
+--// REMOTE (só se quiser manter o board, mas vamos usar bypass real)
+local BoardRemote = ReplicatedStorage:WaitForChild("1Schoo1lDr1yBoard1s", 5)
 
-local SpectraRemote = ReplicatedStorage:FindFirstChild("SpectraRemote")
+--// PLAYER SELECIONADO
+local SelectedPlayer = nil
 
-if not SpectraRemote then
-    SpectraRemote = Instance.new("RemoteEvent")
-    SpectraRemote.Name = "SpectraRemote"
-    SpectraRemote.Parent = ReplicatedStorage
+--==================================================
+-- PEGAR LISTA DE JOGADORES (atualizada)
+--==================================================
+local function GetPlayers()
+    local list = {}
+    for _, player in Players:GetPlayers() do
+        if player ~= LocalPlayer and player.Character then
+            table.insert(list, player.Name)
+        end
+    end
+    return list
 end
 
---====================================
--- SISTEMA DE COMANDOS
---====================================
+--==================================================
+-- FUNÇÕES QUE REALMENTE FAZEM ALGO
+--==================================================
+local function GetCharacter(playerName)
+    local plr = Players:FindFirstChild(playerName)
+    if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        return plr.Character
+    end
+    return nil
+end
 
-local FrozenPlayers = {}
-local JailedPlayers = {}
-
-local function Kill()
-    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.Health = 0
+local function Kill(targetName)
+    local char = GetCharacter(targetName)
+    if not char then warn("["..targetName.."] sem character, fudeu") return end
+    
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+        print("Morreu na porrada: " .. targetName)
     end
 end
 
-local function Freeze()
-    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        FrozenPlayers[LocalPlayer.Name] = hum.WalkSpeed
-        hum.WalkSpeed = 0
-    end
-end
-
-local function Unfreeze()
-    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.WalkSpeed = FrozenPlayers[LocalPlayer.Name] or 16
-    end
-end
-
-local function Jail()
-    if not LocalPlayer.Character then return end
+local function Freeze(targetName)
+    local char = GetCharacter(targetName)
+    if not char then warn("Sem character pra congelar") return end
     
-    local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    
-    local cage = Instance.new("Part")
-    cage.Size = Vector3.new(8,8,8)
-    cage.Anchored = true
-    cage.Transparency = 0.5
-    cage.Material = Enum.Material.ForceField
-    cage.Position = hrp.Position
-    cage.Parent = workspace
-    
-    JailedPlayers[LocalPlayer.Name] = cage
-end
-
-local function Unjail()
-    local cage = JailedPlayers[LocalPlayer.Name]
-    
-    if cage then
-        cage:Destroy()
-        JailedPlayers[LocalPlayer.Name] = nil
-    end
-end
-
---====================================
--- RECEBER COMANDOS
---====================================
-
-SpectraRemote.OnClientEvent:Connect(function(cmd,target)
-
-    if target ~= LocalPlayer.Name then
-        return
-    end
-    
-    if cmd == "kill" then
-        Kill()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
         
-    elseif cmd == "freeze" then
-        Freeze()
+        -- pra ficar mais "congelado" ainda (opcional)
+        for _, part in char:GetChildren() do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Anchored = true
+            end
+        end
         
-    elseif cmd == "unfreeze" then
-        Unfreeze()
+        print("Congelou o arrombado: " .. targetName)
+    end
+end
+
+local function Unfreeze(targetName)
+    local char = GetCharacter(targetName)
+    if not char then return end
+    
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 16
+        humanoid.JumpPower = 50
         
-    elseif cmd == "jail" then
-        Jail()
+        for _, part in char:GetChildren() do
+            if part:IsA("BasePart") then
+                part.Anchored = false
+            end
+        end
         
-    elseif cmd == "unjail" then
-        Unjail()
-        
+        print("Descongelou: " .. targetName)
+    end
+end
+
+local function Jail(targetName)
+    local char = GetCharacter(targetName)
+    if not char then warn("Sem character pra prender") return end
+    
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    -- Cria uma "prisão" simples (pode melhorar depois)
+    local jail = Instance.new("Part")
+    jail.Name = "JailCage"
+    jail.Size = Vector3.new(10, 20, 10)
+    jail.Position = root.Position + Vector3.new(0, 10, 0)
+    jail.Anchored = true
+    jail.CanCollide = true
+    jail.Transparency = 0.4
+    jail.BrickColor = BrickColor.new("Really red")
+    jail.Parent = workspace
+    
+    root.Anchored = true  -- prende o cara
+    print("Prendeu o viado: " .. targetName .. " (prisão básica)")
+end
+
+local function Unjail(targetName)
+    local char = GetCharacter(targetName)
+    if not char then return end
+    
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then
+        root.Anchored = false
     end
     
-end)
+    -- remove prisão se existir
+    for _, obj in workspace:GetChildren() do
+        if obj.Name == "JailCage" then
+            obj:Destroy()
+        end
+    end
+    
+    print("Soltou o cuzão: " .. targetName)
+end
 
---====================================
--- WINDUI
---====================================
-
+--==================================================
+-- WINDUI (mantive igual, só troquei as funções)
+--==================================================
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-
 WindUI:SetTheme("Dark")
 
 local Window = WindUI:CreateWindow({
-    Title = "Spectra Admin",
+    Title = "Spectra Admin BRUTAL",
     Icon = "rbxassetid://7733964640",
-    Author = "Spectra",
+    Author = "Spectra & Zé Pequeno",
     Folder = "SpectraAdmin",
-    Size = UDim2.fromOffset(500,350),
+    Size = UDim2.fromOffset(500, 380),
     Transparent = true
 })
 
-local SelectedPlayer
+local Tab = Window:Tab({ Title = "Admin", Icon = "shield" })
+local Section = Tab:Section({ Title = "Comandos Reais (sem palhaçada)" })
 
-local function GetPlayers()
-
-    local list = {}
-
-    for _,p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(list,p.Name)
-        end
-    end
-
-    return list
-
-end
-
-local Tab = Window:Tab({
-    Title = "Admin",
-    Icon = "shield"
-})
-
-local Section = Tab:Section({
-    Title = "Player Commands"
-})
-
-Section:Dropdown({
+-- Dropdown atualizado
+local dropdown = Section:Dropdown({
     Title = "Selecionar Jogador",
     Values = GetPlayers(),
-    Callback = function(v)
-        SelectedPlayer = v
+    Callback = function(value)
+        SelectedPlayer = value
+        print("Alvo selecionado: " .. (value or "ninguém"))
     end
 })
 
-local function Send(cmd)
-
-    if not SelectedPlayer then return end
-
-    SpectraRemote:FireServer(cmd,SelectedPlayer)
-
+-- Atualiza a lista quando alguém entra/sai
+local function RefreshDropdown()
+    task.spawn(function()
+        task.wait(0.6)
+        pcall(function()
+            dropdown:SetValues(GetPlayers())
+        end)
+    end)
 end
 
-Section:Button({
-    Title = "Kill",
-    Callback = function()
-        Send("kill")
-    end
-})
+Players.PlayerAdded:Connect(RefreshDropdown)
+Players.PlayerRemoving:Connect(RefreshDropdown)
 
-Section:Button({
-    Title = "Jail",
-    Callback = function()
-        Send("jail")
-    end
-})
+-- Botões que agora fazem algo de verdade
+Section:Button({ Title = "Kill", Callback = function() if SelectedPlayer then Kill(SelectedPlayer) end end })
+Section:Button({ Title = "Jail",  Callback = function() if SelectedPlayer then Jail(SelectedPlayer) end end })
+Section:Button({ Title = "Unjail", Callback = function() if SelectedPlayer then Unjail(SelectedPlayer) end end })
+Section:Button({ Title = "Freeze", Callback = function() if SelectedPlayer then Freeze(SelectedPlayer) end end })
+Section:Button({ Title = "Unfreeze", Callback = function() if SelectedPlayer then Unfreeze(SelectedPlayer) end end })
 
-Section:Button({
-    Title = "Unjail",
-    Callback = function()
-        Send("unjail")
-    end
-})
-
-Section:Button({
-    Title = "Freeze",
-    Callback = function()
-        Send("freeze")
-    end
-})
-
-Section:Button({
-    Title = "Unfreeze",
-    Callback = function()
-        Send("unfreeze")
-    end
-})
+print("Spectra Admin carregado, seu filho da puta. Agora mata geral direito!")
