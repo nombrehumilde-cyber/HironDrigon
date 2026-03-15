@@ -196,7 +196,7 @@ end)
 -- UI
 
 local Window = WindUI:CreateWindow({
-Title="Nightmare Hub | Admin",
+Title="HironDrigon Hub | Admin 1.0.1",
 Theme="Dark"
 })
 
