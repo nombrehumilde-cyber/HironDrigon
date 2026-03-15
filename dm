@@ -256,4 +256,3 @@ Callback=function()
 SendCommand(";bring "..Selected)
 end
 })
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Daivd977/Coquettekk/refs/heads/main/README.md"))()
