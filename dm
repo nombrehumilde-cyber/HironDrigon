@@ -22,7 +22,8 @@ local Whitelist = {
 "HironDrigon", -- exemplo de usuário autorizado
 "medr0so_0",
 "Arthurfelipe_blox2",
-"Davilucca"
+"Davilucca",
+"K666pkildd"
 }
 
 local function IsWhitelisted(plr)
