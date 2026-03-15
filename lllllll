@@ -1,7 +1,6 @@
 
 
-loadstring(game:HttpGet("https://pastefy.app/X1EIRKRd/raw"))()
-
+loadstring(game:HttpGet("https://pastefy.app/SUNESW55/raw"))()
 
 loadstring(game:HttpGet("https://pastefy.app/X1EIRKRd/raw"))()
 local Libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/losaztecas859-commits/Redz-library-v5.docs/refs/heads/main/testee2.lua"))()
