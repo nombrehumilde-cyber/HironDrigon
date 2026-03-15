@@ -1,0 +1,341 @@
+repeat task.wait() until game:IsLoaded()
+
+-- Services
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local Debris = game:GetService("Debris")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local ChatChannel = TextChatService.TextChannels:WaitForChild("RBXGeneral")
+
+-- WindUI
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- ================= CHAT SYNC =================
+
+local function SendCommand(cmd)
+    pcall(function()
+        ChatChannel:SendAsync(cmd)
+    end)
+end
+
+-- ================= UI =================
+
+local Window = WindUI:CreateWindow({
+    Title = "Coquette Hub Style",
+    Icon = "shield",
+    Author = "by Otavio",
+    Folder = "MySuperHub",
+    Size = UDim2.fromOffset(580,460),
+    MinSize = Vector2.new(560,350),
+    MaxSize = Vector2.new(850,560),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200
+})
+
+-- ================= PLAYER SYSTEM =================
+
+local SelectedPlayer = LocalPlayer.Name
+
+local function GetPlayers()
+    local t = {}
+    for _,p in pairs(Players:GetPlayers()) do
+        table.insert(t,p.Name)
+    end
+    return t
+end
+
+local function GetPlayer(name)
+    return Players:FindFirstChild(name)
+end
+
+-- ================= COMMANDS =================
+
+local function Kill(plr)
+    if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+        plr.Character.Humanoid.Health = 0
+    end
+end
+
+local function Freeze(plr,state)
+    if not plr.Character then return end
+
+    for _,v in pairs(plr.Character:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Anchored = state
+        end
+    end
+end
+
+local function Jail(plr)
+    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        plr.Character.HumanoidRootPart.CFrame = CFrame.new(0,80,0)
+    end
+end
+
+local function UnJail(plr)
+    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        plr.Character.HumanoidRootPart.CFrame = CFrame.new(0,5,0)
+    end
+end
+
+local function Fling(plr)
+
+    if not plr.Character then return end
+    if not LocalPlayer.Character then return end
+
+    local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local target = plr.Character:FindFirstChild("HumanoidRootPart")
+
+    if root and target then
+
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+        bv.Velocity = (target.Position-root.Position).Unit*150
+        bv.Parent = root
+
+        Debris:AddItem(bv,.3)
+
+    end
+end
+
+local function Bring(plr)
+
+    if plr.Character and LocalPlayer.Character then
+        plr.Character:PivotTo(LocalPlayer.Character:GetPivot())
+    end
+end
+
+local function Explode(plr)
+
+    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+
+        local e = Instance.new("Explosion")
+        e.Position = plr.Character.HumanoidRootPart.Position
+        e.Parent = workspace
+
+    end
+end
+
+-- ================= CHAT LISTENER =================
+
+ChatChannel.MessageReceived:Connect(function(msg)
+
+    local text = msg.Text
+    if not text then return end
+
+    local args = string.split(text," ")
+    local cmd = args[1]
+    local name = args[2]
+
+    if not name then return end
+
+    local plr = GetPlayer(name)
+    if not plr then return end
+
+    if cmd == ";kill" then
+        Kill(plr)
+
+    elseif cmd == ";freeze" then
+        Freeze(plr,true)
+
+    elseif cmd == ";unfreeze" then
+        Freeze(plr,false)
+
+    elseif cmd == ";jail" then
+        Jail(plr)
+
+    elseif cmd == ";unjail" then
+        UnJail(plr)
+
+    elseif cmd == ";fling" then
+        Fling(plr)
+
+    elseif cmd == ";bring" then
+        Bring(plr)
+
+    elseif cmd == ";explode" then
+        Explode(plr)
+
+    end
+
+end)
+
+-- ================= SCRIPTS TAB =================
+
+local ScriptsTab = Window:Tab({Title="Scripts",Icon="code"})
+
+local PlayerDropdown = ScriptsTab:Dropdown({
+    Title="Selecionar Player",
+    Values=GetPlayers(),
+    Callback=function(v)
+        SelectedPlayer = v
+    end
+})
+
+Players.PlayerAdded:Connect(function()
+    PlayerDropdown:Refresh(GetPlayers())
+end)
+
+Players.PlayerRemoving:Connect(function()
+    PlayerDropdown:Refresh(GetPlayers())
+end)
+
+-- ================= ADMIN BUTTONS =================
+
+ScriptsTab:Button({
+Title="Kill",
+Callback=function()
+SendCommand(";kill "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="Freeze",
+Callback=function()
+SendCommand(";freeze "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="UnFreeze",
+Callback=function()
+SendCommand(";unfreeze "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="Jail",
+Callback=function()
+SendCommand(";jail "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="UnJail",
+Callback=function()
+SendCommand(";unjail "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="Fling",
+Callback=function()
+SendCommand(";fling "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="Bring",
+Callback=function()
+SendCommand(";bring "..SelectedPlayer)
+end})
+
+ScriptsTab:Button({
+Title="Explode",
+Callback=function()
+SendCommand(";explode "..SelectedPlayer)
+end})
+
+-- ================= LOCAL PLAYER TAB =================
+
+local LP = Window:Tab({Title="LocalPlayer",Icon="user"})
+
+LP:Input({
+Title="Speed",
+Placeholder="Digite a velocidade",
+Callback=function(v)
+
+local num = tonumber(v)
+
+if num and LocalPlayer.Character then
+LocalPlayer.Character.Humanoid.WalkSpeed = num
+end
+
+end})
+
+LP:Input({
+Title="JumpPower",
+Placeholder="Digite o valor",
+Callback=function(v)
+
+local num = tonumber(v)
+
+if num and LocalPlayer.Character then
+LocalPlayer.Character.Humanoid.JumpPower = num
+end
+
+end})
+
+-- Infinite Jump
+
+local InfJump = false
+
+LP:Toggle({
+Title="InfiniteJump",
+Callback=function(v)
+InfJump = v
+end})
+
+UIS.JumpRequest:Connect(function()
+
+if InfJump and LocalPlayer.Character then
+LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+end
+
+end)
+
+-- Noclip
+
+local Noclip = false
+
+LP:Toggle({
+Title="Noclip",
+Callback=function(v)
+Noclip = v
+end})
+
+RunService.Stepped:Connect(function()
+
+if Noclip and LocalPlayer.Character then
+
+for _,v in pairs(LocalPlayer.Character:GetDescendants()) do
+if v:IsA("BasePart") then
+v.CanCollide = false
+end
+end
+
+end
+
+end)
+
+-- TP Tool
+
+LP:Button({
+Title="TpTool",
+Callback=function()
+
+local tool = Instance.new("Tool")
+tool.RequiresHandle = false
+tool.Name = "TP Tool"
+
+tool.Activated:Connect(function()
+
+local mouse = LocalPlayer:GetMouse()
+
+if mouse.Hit then
+LocalPlayer.Character:PivotTo(CFrame.new(mouse.Hit.Position))
+end
+
+end)
+
+tool.Parent = LocalPlayer.Backpack
+
+end})
+
+-- ================= NOTIFY =================
+
+WindUI:Notify({
+Title="Coquette Hub",
+Content="Admin Sync Ativo",
+Duration=5,
+Image="success"
+})
