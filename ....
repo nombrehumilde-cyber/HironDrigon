@@ -1,0 +1,1243 @@
+-- ===============================================
+-- CUSTOM CMD-X STYLE ADMIN UI - ULTRA FINAL
+-- Gradiente no fundo, quadrados piscando azul/preto, InfiniteJump real, TPTool funcional
+-- ===============================================
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local StarterPack = game:GetService("StarterPack")
+local SoundService = game:GetService("SoundService")
+
+-- CONFIGURAÇÕES
+local MENU_SIZE = UDim2.new(0, 300, 0, 300)
+local MENU_POSITION = UDim2.new(0.5, -150, 0.5, -150)
+local Dragging = false
+local DragOffset = Vector2.new(0,0)
+local InfiniteJump = false
+local Noclip = false
+local BodyVisible = true
+local MenuVisible = true
+local TPToolActive = false
+
+-- === UI PRINCIPAL ===
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CustomAdminUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local MenuFrame = Instance.new("Frame")
+MenuFrame.Size = MENU_SIZE
+MenuFrame.Position = MENU_POSITION
+MenuFrame.AnchorPoint = Vector2.new(0,0)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MenuFrame.BorderSizePixel = 0
+MenuFrame.Parent = ScreenGui
+MenuFrame.ClipsDescendants = true
+MenuFrame.Active = true
+
+-- Bordas pulsantes
+local Border = Instance.new("UIStroke")
+Border.Thickness = 2
+Border.Parent = MenuFrame
+Border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+Border.LineJoinMode = Enum.LineJoinMode.Round
+
+-- Gradiente vertical fundo (preto -> azul escuro)
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,50))
+}
+Gradient.Rotation = 90
+Gradient.Parent = MenuFrame
+
+-- === Barra superior ===
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1,0,0,30)
+TopBar.BackgroundTransparency = 1
+TopBar.Parent = MenuFrame
+
+-- Texto do menu (HiroDragon)
+local MenuTitle = Instance.new("TextLabel")
+MenuTitle.Size = UDim2.new(1, -60, 1, 0)
+MenuTitle.Position = UDim2.new(0, 0, 0, 0)
+MenuTitle.BackgroundTransparency = 1
+MenuTitle.Text = "HiroDragon"
+MenuTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+MenuTitle.Font = Enum.Font.SourceSansBold
+MenuTitle.TextSize = 20
+MenuTitle.TextXAlignment = Enum.TextXAlignment.Left
+MenuTitle.TextYAlignment = Enum.TextYAlignment.Center
+MenuTitle.Parent = TopBar
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0,30,0,30)
+CloseBtn.Position = UDim2.new(1,-30,0,0)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255,0,0)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Parent = TopBar
+
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0,30,0,30)
+MinimizeBtn.Position = UDim2.new(1,-60,0,0)
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.fromRGB(255,255,0)
+MinimizeBtn.BackgroundTransparency = 1
+MinimizeBtn.Parent = TopBar
+
+-- Corpo do menu
+local BodyFrame = Instance.new("Frame")
+BodyFrame.Size = UDim2.new(1,0,1, -30)
+BodyFrame.Position = UDim2.new(0,0,0,30)
+BodyFrame.BackgroundTransparency = 1
+BodyFrame.Parent = MenuFrame
+
+-- TextBox
+local CommandBox = Instance.new("TextBox")
+CommandBox.Size = UDim2.new(1,-10,0,30)
+CommandBox.Position = UDim2.new(0,5,0,0)
+CommandBox.PlaceholderText = "Digite um comando..."
+CommandBox.TextColor3 = Color3.fromRGB(255,255,255)
+CommandBox.BackgroundColor3 = Color3.fromRGB(20,20,20)
+CommandBox.BorderSizePixel = 0
+CommandBox.Parent = BodyFrame
+
+-- Lista de comandos
+local CommandListFrame = Instance.new("ScrollingFrame")
+CommandListFrame.Size = UDim2.new(1,0,1,-35)
+CommandListFrame.Position = UDim2.new(0,0,0,35)
+CommandListFrame.CanvasSize = UDim2.new(0,0,0,0)
+CommandListFrame.ScrollBarThickness = 6
+CommandListFrame.BackgroundTransparency = 1
+CommandListFrame.Parent = BodyFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0,5)
+UIListLayout.Parent = CommandListFrame
+
+local function AddCommandLabel(text)
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -10, 0, 25)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.fromRGB(255,255,255)
+	label.Font = Enum.Font.SourceSansBold
+	label.TextSize = 18
+	label.Text = text
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = CommandListFrame
+	CommandListFrame.CanvasSize = UDim2.new(0,0,0,UIListLayout.AbsoluteContentSize.Y)
+end
+
+local commandNames = {
+	";speed me (numero)",
+	";infinitejump",
+	";uninfinitejump",
+	";noclip",
+	";unnoclip",
+	";tptool",
+	";jumppower (numero)",
+	";view (player)",
+	";unview",
+	";goto (player)",
+	";bring (player)",
+	";emotes",
+	";fly",
+	";music (id)",
+	";aviso (text)",
+	";esp (cor)",
+	";gravity (numero)",
+	";ungravity",
+	";clickfling",
+	";fling",
+	";unfling",
+  ";greenballon [NATURAL DISASTER]",
+  ";float",
+  ";rejoin",
+  ";chat (text)",
+  ";esp2",
+  ";console",
+  ";cmdbar"
+  
+
+   }
+for _,cmd in ipairs(commandNames) do
+	AddCommandLabel(cmd)
+end-- === SISTEMA DE COMANDOS AUXILIAR ===
+local Camera = Workspace.CurrentCamera
+local Commands = {}
+
+local function GetPlayer(name)
+	name = name:lower()
+	for _,plr in pairs(Players:GetPlayers()) do
+		if plr.Name:lower():sub(1,#name) == name then
+			return plr
+		end
+	end
+end
+
+local function Notify(title, text)
+	warn(title .. ": " .. text)
+end
+
+-- === VIEW FUNCIONAL ===
+Commands["view"] = function(targetName)
+	local target = GetPlayer(targetName)
+	if not target or not target.Character then
+		Notify("View", "Player inválido")
+		return
+	end
+	local hum = target.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		Camera.CameraSubject = hum
+	end
+end
+
+Commands["unview"] = function()
+	local char = LocalPlayer.Character
+	if char then
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			Camera.CameraSubject = hum
+		end
+	end
+end
+
+-- === GOTO FUNCIONAL ===
+Commands["goto"] = function(targetName)
+	local target = GetPlayer(targetName)
+	if not target then
+		Notify("Goto", "Player não encontrado")
+		return
+	end
+	local char = LocalPlayer.Character
+	local tchar = target.Character
+	if char and tchar and char:FindFirstChild("HumanoidRootPart") and tchar:FindFirstChild("HumanoidRootPart") then
+		char.HumanoidRootPart.CFrame = tchar.HumanoidRootPart.CFrame * CFrame.new(0,0,-3)
+	end
+end
+
+-- === INFINITE JUMP REAL ===
+local UIS = game:GetService("UserInputService")
+
+UIS.JumpRequest:Connect(function()
+	if InfiniteJump then
+		local char = LocalPlayer.Character
+		if char then
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+	end
+end)
+
+Commands["infinitejump"] = function()
+	InfiniteJump = not InfiniteJump
+	Notify("InfiniteJump", InfiniteJump and "ATIVADO" or "DESATIVADO")
+end
+
+-- === EXECUÇÃO DE COMANDOS ===
+local function ExecuteCommand(text)
+	local args = text:split(" ")
+	local cmd = args[1]:lower()
+	local char = LocalPlayer.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return end
+
+	if cmd == ";speed" and args[2] == "me" and args[3] then
+		local speed = tonumber(args[3])
+		if speed then humanoid.WalkSpeed = speed end
+
+	elseif cmd == ";jumppower" and args[2] then
+		humanoid.JumpPower = tonumber(args[2]) or 50
+
+	elseif cmd == ";tptool" then
+		local tool = Instance.new("Tool")
+		tool.Name = "TPTool"
+		tool.RequiresHandle = false
+		tool.CanBeDropped = false
+		tool.Parent = LocalPlayer.Backpack
+		tool.Activated:Connect(function()
+			local mouse = LocalPlayer:GetMouse()
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				char.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0,3,0))
+			end
+		end)
+
+	elseif cmd == ";music" and args[2] then
+		local sound = Instance.new("Sound")
+		sound.SoundId = "rbxassetid://" .. args[2]
+		sound.Volume = 1
+		sound.Looped = false
+		sound.Parent = SoundService
+		sound:Play()
+
+	elseif cmd == ";emotes" then
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))()
+
+	elseif cmd == ";fly" then
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-HD-Admin-Fly-60269"))()
+
+	elseif cmd == ";bring" and args[2] then
+		local target = GetPlayer(args[2])
+		if target and target.Character and char and char:FindFirstChild("HumanoidRootPart") then
+			target.Character.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame
+		end
+
+	elseif cmd == ";aviso" and args[2] then
+		Commands["aviso"](table.concat({select(2, table.unpack(args))}, " "))
+
+	elseif cmd == ";gravity" and args[2] then
+		local num = tonumber(args[2])
+		if num then
+			Workspace.Gravity = num
+			Notify("Gravity", "Gravidade definida para "..num)
+		else
+			Notify("Gravity", "Valor inválido")
+		end
+
+	elseif cmd == ";ungravity" then
+		Workspace.Gravity = 196.2
+		Notify("Gravity", "Gravidade restaurada para padrão")
+
+	elseif Commands[cmd:sub(2)] then
+		Commands[cmd:sub(2)](args[2])
+	end
+end
+
+CommandBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed then
+		ExecuteCommand(CommandBox.Text)
+		CommandBox.Text = ""
+	end
+end)-- === DRAG ===
+TopBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		Dragging = true
+		DragOffset = input.Position - MenuFrame.AbsolutePosition
+	end
+end)
+
+TopBar.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		Dragging = false
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		MenuFrame.Position = UDim2.new(0, input.Position.X - DragOffset.X, 0, input.Position.Y - DragOffset.Y)
+	end
+end)
+
+-- === Fechar / Minimizar ===
+CloseBtn.MouseButton1Click:Connect(function()
+	MenuFrame.Visible = false
+end)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+	BodyVisible = not BodyVisible
+	BodyFrame.Visible = BodyVisible
+end)
+
+-- === Ball toggle flutuante ===
+local Ball = Instance.new("TextButton")
+Ball.Size = UDim2.new(0,40,0,40)
+Ball.Position = UDim2.new(0,50,0,100)
+Ball.Text = "cmd"
+Ball.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Ball.BackgroundTransparency = 0.3
+Ball.TextColor3 = Color3.fromRGB(255,255,255)
+Ball.BorderSizePixel = 2
+Ball.Parent = ScreenGui
+Ball.ZIndex = 10
+
+spawn(function()
+	local direction = 1
+	while true do
+		local pos = Ball.Position
+		local newY = pos.Y.Offset + direction
+		if newY > 120 then direction = -1 end
+		if newY < 80 then direction = 1 end
+		Ball.Position = UDim2.new(pos.X.Scale,pos.X.Offset,pos.Y.Scale,newY)
+		task.wait(0.02)
+	end
+end)
+
+Ball.MouseButton1Click:Connect(function()
+	MenuVisible = not MenuVisible
+	MenuFrame.Visible = MenuVisible
+end)
+
+-- === Bordas pulsantes ===
+spawn(function()
+	local hue = 0
+	while task.wait(0.02) do
+		hue = (hue + 0.5) % 360
+		Border.Color = Color3.fromHSV(0.6,0.8,0.5 + 0.5*math.sin(hue/180*math.pi))
+	end
+end)
+
+-- === Quadrados de fundo ===
+local Squares = {}
+local MenuWidth = MenuFrame.Size.X.Offset
+local MenuHeight = MenuFrame.Size.Y.Offset
+
+for i=1,50 do
+	local size = math.random(5,18)
+	local sq = Instance.new("Frame")
+	sq.Size = UDim2.new(0,size,0,size)
+	sq.Position = UDim2.new(0, math.random(0, MenuWidth - size), 0, math.random(30, MenuHeight - size))
+	sq.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	sq.BorderSizePixel = 0
+	sq.Parent = MenuFrame
+	table.insert(Squares, {frame = sq, speed = math.random(1,4), state = math.random() * 10})
+end
+
+RunService.RenderStepped:Connect(function()
+	for _,sqData in ipairs(Squares) do
+		local sq = sqData.frame
+		sq.Position = UDim2.new(0, sq.Position.X.Offset, 0, sq.Position.Y.Offset + sqData.speed)
+		if sq.Position.Y.Offset > MenuHeight then
+			sq.Position = UDim2.new(0, math.random(0, MenuWidth - sq.Size.X.Offset), 0, 30)
+		end
+		sqData.state += 0.2
+		local alpha = (math.sin(sqData.state * math.pi * 10) + 1)/2
+		sq.BackgroundColor3 = Color3.fromRGB(0, 0, math.floor(255 * alpha))
+	end
+end)
+
+-- === Noclip ===
+RunService.Stepped:Connect(function()
+	if Noclip then
+		local char = LocalPlayer.Character
+		if char then
+			for _,part in pairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+		end
+	end
+end)
+
+-- === COMANDO AVISO ===
+Commands["aviso"] = function(text)
+	if not text or text == "" then
+		Notify("Aviso", "Nenhum texto especificado")
+		return
+	end
+
+	local avisoGui = Instance.new("ScreenGui")
+	avisoGui.Name = "AvisoGUI"
+	avisoGui.ResetOnSpawn = false
+	avisoGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+	local avisoFrame = Instance.new("Frame")
+	avisoFrame.Size = UDim2.new(1,0,0,50)
+	avisoFrame.Position = UDim2.new(0,0,0,-50)
+	avisoFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	avisoFrame.BorderSizePixel = 0
+	avisoFrame.Parent = avisoGui
+
+	local avisoText = Instance.new("TextLabel")
+	avisoText.Size = UDim2.new(1,0,1,0)
+	avisoText.Position = UDim2.new(0,0,0,0)
+	avisoText.BackgroundTransparency = 1
+	avisoText.Text = text
+	avisoText.TextColor3 = Color3.fromRGB(255,255,255)
+	avisoText.Font = Enum.Font.SourceSansBold
+	avisoText.TextSize = 22
+	avisoText.TextScaled = true
+	avisoText.Parent = avisoFrame
+
+	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local tweenDown = TweenService:Create(avisoFrame, tweenInfo, {Position = UDim2.new(0,0,0,0)})
+	tweenDown:Play()
+
+	task.delay(3, function()
+		local tweenUp = TweenService:Create(avisoFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(0,0,0,-50)})
+		tweenUp:Play()
+		tweenUp.Completed:Connect(function()
+			avisoGui:Destroy()
+		end)
+	end)
+end
+
+-- === COMANDO ESP ===
+local ESPs = {}
+
+Commands["esp"] = function(colorName)
+	local colors = {
+		vermelho = Color3.fromRGB(255,0,0),
+		azul = Color3.fromRGB(0,0,255),
+		verde = Color3.fromRGB(0,255,0),
+		amarelo = Color3.fromRGB(255,255,0),
+		roxo = Color3.fromRGB(128,0,128),
+		branco = Color3.fromRGB(255,255,255)
+	}
+
+	local espColor = colors[colorName:lower()] or Color3.fromRGB(255,255,255)
+
+	-- Limpa ESP antigo
+	for _,esp in pairs(ESPs) do
+		if esp and esp.Parent then
+			esp:Destroy()
+		end
+	end
+	ESPs = {}
+
+	-- Cria ESP para cada player
+	for _,plr in pairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+			local box = Instance.new("BoxHandleAdornment")
+			box.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
+			box.Size = Vector3.new(2,3,1)
+			box.Color3 = espColor
+			box.Transparency = 0.5
+			box.AlwaysOnTop = true
+			box.ZIndex = 10
+			box.Parent = plr.Character:FindFirstChild("HumanoidRootPart")
+			table.insert(ESPs, box)
+		end
+	end
+
+	Notify("ESP", "ESP ativado com cor "..colorName)
+end
+
+print("CMD-X FINAL: tudo funcionando, HiroDragon no topo, ;view, ;goto, ;infinitejump, ;aviso, ;esp e ;gravity ativos")-- === CLICKFLING REEXECUTÁVEL (SEM TRAVA) ===
+local ClickFlingTool = nil
+local ClickFlingSpin = nil
+local Flinging = false
+
+local MAX_DISTANCE = 25
+
+local function cleanup(hum)
+	Flinging = false
+	Noclip = false
+
+	if ClickFlingSpin then
+		ClickFlingSpin:Destroy()
+		ClickFlingSpin = nil
+	end
+
+	if hum then
+		Camera.CameraSubject = hum
+	end
+end
+
+Commands["clickfling"] = function()
+	-- destrói tool antiga se existir
+	if ClickFlingTool then
+		ClickFlingTool:Destroy()
+		ClickFlingTool = nil
+	end
+
+	local char = LocalPlayer.Character
+	if not char then return end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hum or not hrp then return end
+
+	-- cria tool NOVA sempre
+	ClickFlingTool = Instance.new("Tool")
+	ClickFlingTool.Name = "fling"
+	ClickFlingTool.RequiresHandle = false
+	ClickFlingTool.CanBeDropped = true
+	ClickFlingTool.Parent = LocalPlayer.Backpack
+
+	-- clique = FLING
+	ClickFlingTool.Activated:Connect(function()
+		if Flinging then return end
+
+		local mouse = LocalPlayer:GetMouse()
+		if not mouse.Target then return end
+
+		local model = mouse.Target:FindFirstAncestorOfClass("Model")
+		if not model or model == char then return end
+
+		local targetHRP = model:FindFirstChild("HumanoidRootPart")
+		local targetHum = model:FindFirstChildOfClass("Humanoid")
+		if not targetHRP or not targetHum then return end
+
+		Flinging = true
+		Noclip = true
+
+		-- spin
+		ClickFlingSpin = Instance.new("BodyAngularVelocity")
+		ClickFlingSpin.Name = "ClickFlingSpin"
+		ClickFlingSpin.AngularVelocity = Vector3.new(0,99999,0)
+		ClickFlingSpin.MaxTorque = Vector3.new(0,math.huge,0)
+		ClickFlingSpin.Parent = hrp
+
+		-- view
+		Camera.CameraSubject = targetHum
+
+		-- loop enquanto no chão e perto
+		task.spawn(function()
+			while Flinging do
+				if hum.FloorMaterial == Enum.Material.Air then break end
+				if not targetHRP.Parent then break end
+				if (hrp.Position - targetHRP.Position).Magnitude > MAX_DISTANCE then break end
+
+				hrp.CFrame = targetHRP.CFrame
+				task.wait(0.1)
+			end
+
+			cleanup(hum)
+		end)
+	end)
+
+	-- sentou = cancela
+	hum.Seated:Connect(function(active)
+		if active then
+			cleanup(hum)
+			if ClickFlingTool then
+				ClickFlingTool.Parent = Workspace
+				ClickFlingTool = nil
+			end
+		end
+	end)
+
+	Notify("ClickFling", "Tool criada. Pode morrer e executar de novo.")
+end 
+-- === COMANDOS FLING / UNFLING ===
+local FlingSpin = nil
+
+Commands["fling"] = function()
+	local char = LocalPlayer.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	-- ativa noclip
+	Noclip = true
+	for _, part in pairs(char:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+
+	-- ativa spin
+	if not FlingSpin then
+		FlingSpin = Instance.new("BodyAngularVelocity")
+		FlingSpin.Name = "FlingSpin"
+		FlingSpin.AngularVelocity = Vector3.new(0, 200000, 0)
+		FlingSpin.MaxTorque = Vector3.new(0, math.huge, 0)
+		FlingSpin.Parent = hrp
+	end
+
+	Notify("Fling", "Ativado (spin 200000 + noclip)")
+end
+
+Commands["unfling"] = function()
+	local char = LocalPlayer.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if hrp and FlingSpin then
+		FlingSpin:Destroy()
+		FlingSpin = nil
+	end
+
+	-- desativa noclip
+	Noclip = false
+	for _, part in pairs(char:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = true
+		end
+	end
+
+	Notify("Fling", "Desativado")
+end-- === COMANDO GREENBALLON (NATURAL DISASTER) ===
+Commands["greenballon"] = function()
+	local function createNotif(title, text, icon, duration)
+		game.StarterGui:SetCore("SendNotification", {
+			Title = title;
+			Text = text;
+			Icon = icon;
+			Duration = duration;
+		})
+	end
+
+	local balloon = Workspace:FindFirstChild("GreenBalloon", true)
+
+	if balloon then
+		local clone = balloon:Clone()
+		clone.Parent = LocalPlayer.Backpack
+		createNotif("garfield", "🎈 balloon successfully stolen!", nil, 5)
+	else
+		createNotif("garfield", "🎈 there is no balloons.", nil, 5)
+	end
+end-- === COMANDO ESP2 (NICK PERMANENTE) ===
+local ESP2Connections = {}
+local ESP2Guis = {}
+
+local function clearESP2()
+	for _,gui in pairs(ESP2Guis) do
+		if gui then gui:Destroy() end
+	end
+	ESP2Guis = {}
+
+	for _,c in pairs(ESP2Connections) do
+		if c then c:Disconnect() end
+	end
+	ESP2Connections = {}
+end
+
+local function createESP2(player, color)
+	if player == LocalPlayer then return end
+
+	local function apply(char)
+		local head = char:WaitForChild("Head", 5)
+		if not head then return end
+
+		if ESP2Guis[player] then
+			ESP2Guis[player]:Destroy()
+		end
+
+		local bill = Instance.new("BillboardGui")
+		bill.Name = "ESP2"
+		bill.AlwaysOnTop = true
+		bill.Size = UDim2.new(0,200,0,50)
+		bill.StudsOffset = Vector3.new(0,2.5,0)
+		bill.Parent = head
+
+		local txt = Instance.new("TextLabel")
+		txt.Size = UDim2.new(1,0,1,0)
+		txt.BackgroundTransparency = 1
+		txt.Text = player.Name
+		txt.TextColor3 = color
+		txt.TextStrokeTransparency = 0
+		txt.TextStrokeColor3 = Color3.new(0,0,0)
+		txt.Font = Enum.Font.SourceSansBold
+		txt.TextScaled = true
+		txt.Parent = bill
+
+		ESP2Guis[player] = bill
+	end
+
+	if player.Character then
+		apply(player.Character)
+	end
+
+	ESP2Connections[player] = player.CharacterAdded:Connect(apply)
+end
+
+Commands["esp2"] = function(colorName)
+	clearESP2()
+
+	local colors = {
+		vermelho = Color3.fromRGB(255,0,0),
+		azul = Color3.fromRGB(0,0,255),
+		verde = Color3.fromRGB(0,255,0),
+		amarelo = Color3.fromRGB(255,255,0),
+		roxo = Color3.fromRGB(128,0,128),
+		branco = Color3.fromRGB(255,255,255)
+	}
+
+	local color = colors[colorName and colorName:lower()] or Color3.fromRGB(255,255,255)
+
+	for _,plr in pairs(Players:GetPlayers()) do
+		createESP2(plr, color)
+	end
+
+	Players.PlayerAdded:Connect(function(plr)
+		createESP2(plr, color)
+	end)
+
+	Notify("ESP2", "Nick ESP permanente ativado")
+end-- === EXTRA COMMANDS : REJOIN / CHAT / FLOAT ===
+
+local TeleportService = game:GetService("TeleportService")
+
+-- ;rejoin
+Commands["rejoin"] = function()
+	TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end
+
+-- ;chat (texto)
+Commands["chat"] = function(text)
+	if not text or text == "" then return end
+	pcall(function()
+		LocalPlayer:Chat(text)
+	end)
+end
+
+-- ;float (toggle)
+local FloatBP, FloatBG, FloatConn
+
+Commands["float"] = function()
+	local char = LocalPlayer.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	-- DESLIGA
+	if FloatBP then
+		if FloatConn then FloatConn:Disconnect() end
+		FloatBP:Destroy()
+		FloatBG:Destroy()
+		FloatBP, FloatBG, FloatConn = nil, nil, nil
+		Notify("Float", "Desativado")
+		return
+	end
+
+	-- LIGA
+	FloatBP = Instance.new("BodyPosition")
+	FloatBP.MaxForce = Vector3.new(0, math.huge, 0)
+	FloatBP.Position = hrp.Position
+	FloatBP.P = 30000
+	FloatBP.Parent = hrp
+
+	FloatBG = Instance.new("BodyGyro")
+	FloatBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+	FloatBG.P = 3000
+	FloatBG.CFrame = hrp.CFrame
+	FloatBG.Parent = hrp
+
+	FloatConn = RunService.RenderStepped:Connect(function()
+		if FloatBP and hrp then
+			FloatBP.Position = hrp.Position
+			FloatBG.CFrame = Workspace.CurrentCamera.CFrame
+		end
+	end)
+
+	Notify("Float", "Ativado")
+end-- ===============================================
+-- EXECUTAR COMANDOS PELO CHAT
+-- ===============================================
+
+LocalPlayer.Chatted:Connect(function(msg)
+	-- ignora mensagens que não são comandos
+	if msg:sub(1,1) ~= ";" then return end
+
+	-- executa o comando do mesmo jeito que o textbox
+	pcall(function()
+		ExecuteCommand(msg)
+	end)
+end)-- ===============================================
+-- SISTEMA DE AVISO DE COMANDO (SUCESSO / ERRO)
+-- COLOCAR NO FINAL DO SCRIPT
+-- ===============================================
+
+-- GUI do aviso
+local CmdNotifyGui = Instance.new("ScreenGui")
+CmdNotifyGui.Name = "CmdNotify"
+CmdNotifyGui.ResetOnSpawn = false
+CmdNotifyGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local NotifyFrame = Instance.new("Frame")
+NotifyFrame.Size = UDim2.new(0,260,0,40)
+NotifyFrame.Position = UDim2.new(1,-270,1,-90)
+NotifyFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+NotifyFrame.BorderSizePixel = 0
+NotifyFrame.Visible = false
+NotifyFrame.Parent = CmdNotifyGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0,8)
+Corner.Parent = NotifyFrame
+
+local NotifyText = Instance.new("TextLabel")
+NotifyText.Size = UDim2.new(1,-10,1,0)
+NotifyText.Position = UDim2.new(0,5,0,0)
+NotifyText.BackgroundTransparency = 1
+NotifyText.TextColor3 = Color3.fromRGB(255,255,255)
+NotifyText.Font = Enum.Font.SourceSansBold
+NotifyText.TextSize = 16
+NotifyText.TextXAlignment = Enum.TextXAlignment.Left
+NotifyText.Text = ""
+NotifyText.Parent = NotifyFrame
+
+local function ShowCmdNotify(text, success)
+	NotifyText.Text = text
+	NotifyFrame.BackgroundColor3 = success
+		and Color3.fromRGB(0,120,255)
+		or Color3.fromRGB(180,0,0)
+
+	NotifyFrame.Visible = true
+	NotifyFrame.Position = UDim2.new(1,300,1,-90)
+
+	TweenService:Create(
+		NotifyFrame,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Position = UDim2.new(1,-270,1,-90)}
+	):Play()
+
+	task.delay(2, function()
+		TweenService:Create(
+			NotifyFrame,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{Position = UDim2.new(1,300,1,-90)}
+		):Play()
+	end)
+end
+
+-- guarda o ExecuteCommand original
+local _OldExecuteCommand = ExecuteCommand
+
+-- sobrescreve
+function ExecuteCommand(text)
+	local args = text:split(" ")
+	local cmd = args[1]:lower()
+
+	local success = false
+	local ok, err = pcall(function()
+		_OldExecuteCommand(text)
+	end)
+
+	-- validações simples (sem frescura)
+	if cmd == ";speed" then
+		success = (args[2] == "me" and tonumber(args[3]) ~= nil)
+
+	elseif cmd == ";jumppower" then
+		success = tonumber(args[2]) ~= nil
+
+	elseif cmd == ";gravity" then
+		success = tonumber(args[2]) ~= nil
+
+	elseif Commands[cmd:sub(2)] then
+		success = true
+	end
+
+	if success then
+		ShowCmdNotify(text:sub(2) .. " ativado", true)
+	else
+		ShowCmdNotify("comando errado", false)
+	end
+end-- === COMANDO ;console ===
+local StarterGui = game:GetService("StarterGui")
+
+Commands["console"] = function()
+	pcall(function()
+		StarterGui:SetCore("DevConsoleVisible", true)
+	end)
+end-- ===============================================
+-- ABA DE CONFIGURAÇÕES + PREFIXO DINÂMICO
+-- COLA ISSO NO FIM DO SCRIPT. SÓ ISSO.
+-- ===============================================
+
+-- PREFIXO GLOBAL
+local COMMAND_PREFIX = ";"
+
+-- ================= BOTÃO ⚙️ =================
+local ConfigBtn = Instance.new("TextButton")
+ConfigBtn.Size = UDim2.new(0,30,0,30)
+ConfigBtn.Position = UDim2.new(1,-90,0,0)
+ConfigBtn.Text = "⚙"
+ConfigBtn.TextColor3 = Color3.fromRGB(0,170,255)
+ConfigBtn.BackgroundTransparency = 1
+ConfigBtn.Parent = TopBar
+
+-- ================= ABA CONFIG =================
+local ConfigFrame = Instance.new("Frame")
+ConfigFrame.Size = BodyFrame.Size
+ConfigFrame.Position = BodyFrame.Position
+ConfigFrame.BackgroundTransparency = 1
+ConfigFrame.Visible = false
+ConfigFrame.Parent = MenuFrame
+
+-- ================= CRÉDITOS =================
+local Credits = Instance.new("TextLabel")
+Credits.Size = UDim2.new(1,0,0,60)
+Credits.Position = UDim2.new(0,0,0,10)
+Credits.BackgroundTransparency = 1
+Credits.Text = "Créditos:\nMedr0so_0  |  Arthurfelipe_blox2"
+Credits.TextColor3 = Color3.fromRGB(255,255,255)
+Credits.Font = Enum.Font.SourceSansBold
+Credits.TextSize = 18
+Credits.TextWrapped = true
+Credits.Parent = ConfigFrame
+
+-- ================= PREFIX BOX =================
+local PrefixLabel = Instance.new("TextLabel")
+PrefixLabel.Size = UDim2.new(1,0,0,25)
+PrefixLabel.Position = UDim2.new(0,0,0,80)
+PrefixLabel.BackgroundTransparency = 1
+PrefixLabel.Text = "Prefixo de comando (; ou /)"
+PrefixLabel.TextColor3 = Color3.fromRGB(200,200,200)
+PrefixLabel.Font = Enum.Font.SourceSansBold
+PrefixLabel.TextSize = 16
+PrefixLabel.Parent = ConfigFrame
+
+local PrefixBox = Instance.new("TextBox")
+PrefixBox.Size = UDim2.new(0,100,0,30)
+PrefixBox.Position = UDim2.new(0.5,-50,0,110)
+PrefixBox.Text = COMMAND_PREFIX
+PrefixBox.PlaceholderText = "; ou /"
+PrefixBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+PrefixBox.TextColor3 = Color3.fromRGB(255,255,255)
+PrefixBox.BorderSizePixel = 0
+PrefixBox.Parent = ConfigFrame
+
+PrefixBox.FocusLost:Connect(function()
+	if PrefixBox.Text == ";" or PrefixBox.Text == "/" then
+		COMMAND_PREFIX = PrefixBox.Text
+		PrefixBox.Text = COMMAND_PREFIX
+		ShowCmdNotify("prefixo alterado para "..COMMAND_PREFIX, true)
+	else
+		PrefixBox.Text = COMMAND_PREFIX
+		ShowCmdNotify("prefixo inválido", false)
+	end
+end)
+
+-- ================= TROCA DE ABAS =================
+local InConfig = false
+ConfigBtn.MouseButton1Click:Connect(function()
+	InConfig = not InConfig
+	BodyFrame.Visible = not InConfig
+	ConfigFrame.Visible = InConfig
+end)
+
+-- ================= EXECUÇÃO COM PREFIXO =================
+local _OldExecuteCommand2 = ExecuteCommand
+function ExecuteCommand(text)
+	if text:sub(1,1) ~= COMMAND_PREFIX then
+		ShowCmdNotify("prefixo errado", false)
+		return
+	end
+	_OldExecuteCommand2(text)
+end
+
+-- ================= CHAT COM PREFIXO =================
+LocalPlayer.Chatted:Connect(function(msg)
+	if msg:sub(1,1) ~= COMMAND_PREFIX then return end
+	pcall(function()
+		ExecuteCommand(msg)
+	end)
+end)-- ===============================================
+-- ATUALIZAR NOME DOS COMANDOS PELO PREFIXO
+-- ===============================================
+
+-- função que troca ; ou / no começo dos comandos visíveis
+local function UpdateCommandLabels(prefix)
+	for _,obj in ipairs(CommandListFrame:GetChildren()) do
+		if obj:IsA("TextLabel") then
+			-- só mexe em linhas que começam com ; ou /
+			if obj.Text:sub(1,1) == ";" or obj.Text:sub(1,1) == "/" then
+				obj.Text = prefix .. obj.Text:sub(2)
+			end
+		end
+	end
+end
+
+-- aplica ao iniciar
+UpdateCommandLabels(COMMAND_PREFIX)
+
+-- reaplica sempre que o prefixo mudar
+PrefixBox.FocusLost:Connect(function()
+	if PrefixBox.Text == ";" or PrefixBox.Text == "/" then
+		COMMAND_PREFIX = PrefixBox.Text
+		PrefixBox.Text = COMMAND_PREFIX
+		UpdateCommandLabels(COMMAND_PREFIX)
+		ShowCmdNotify("prefixo alterado para "..COMMAND_PREFIX, true)
+	else
+		PrefixBox.Text = COMMAND_PREFIX
+		ShowCmdNotify("prefixo inválido", false)
+	end
+end)-- === COMANDO ;cmdbar (POSIÇÃO MOBILE SAFE) ===
+local CmdBarGui
+local CmdBarDragging = false
+local CmdBarDragOffset = Vector2.new()
+local CmdBarExpanded = true
+
+Commands["cmdbar"] = function()
+	-- toggle
+	if CmdBarGui then
+		CmdBarGui.Enabled = not CmdBarGui.Enabled
+		return
+	end
+
+	-- GUI
+	CmdBarGui = Instance.new("ScreenGui")
+	CmdBarGui.Name = "CmdBarGui"
+	CmdBarGui.ResetOnSpawn = false
+	CmdBarGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+	-- FRAME PRINCIPAL
+	local Frame = Instance.new("Frame")
+	Frame.Size = UDim2.new(0,260,0,90)
+	Frame.Position = UDim2.new(1,-320,1,-200) -- <<< AQUI FICA ACIMA DO PULO
+	Frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+	Frame.BorderSizePixel = 0
+	Frame.Parent = CmdBarGui
+	Frame.Active = true
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0,8)
+	Corner.Parent = Frame
+
+	-- TOPO (DRAG)
+	local Top = Instance.new("Frame")
+	Top.Size = UDim2.new(1,0,0,25)
+	Top.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	Top.BorderSizePixel = 0
+	Top.Parent = Frame
+
+	local TopCorner = Instance.new("UICorner")
+	TopCorner.CornerRadius = UDim.new(0,8)
+	TopCorner.Parent = Top
+
+	local Title = Instance.new("TextLabel")
+	Title.Size = UDim2.new(1,-30,1,0)
+	Title.BackgroundTransparency = 1
+	Title.Text = "CMD BAR"
+	Title.TextColor3 = Color3.fromRGB(255,255,255)
+	Title.Font = Enum.Font.SourceSansBold
+	Title.TextSize = 14
+	Title.Parent = Top
+
+	local Min = Instance.new("TextButton")
+	Min.Size = UDim2.new(0,30,1,0)
+	Min.Position = UDim2.new(1,-30,0,0)
+	Min.Text = "-"
+	Min.BackgroundTransparency = 1
+	Min.TextColor3 = Color3.fromRGB(255,255,0)
+	Min.Font = Enum.Font.SourceSansBold
+	Min.TextSize = 18
+	Min.Parent = Top
+
+	-- TEXTBOX
+	local Box = Instance.new("TextBox")
+	Box.Size = UDim2.new(1,-20,0,30)
+	Box.Position = UDim2.new(0,10,0,45)
+	Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	Box.TextColor3 = Color3.fromRGB(255,255,255)
+	Box.PlaceholderText = "digita o comando e aperta enter"
+	Box.BorderSizePixel = 0
+	Box.ClearTextOnFocus = false
+	Box.Font = Enum.Font.SourceSans
+	Box.TextSize = 16
+	Box.Parent = Frame
+
+	local BoxCorner = Instance.new("UICorner")
+	BoxCorner.CornerRadius = UDim.new(0,6)
+	BoxCorner.Parent = Box
+
+	-- EXECUTA COMANDO
+	Box.FocusLost:Connect(function(enter)
+		if enter and Box.Text ~= "" then
+			ExecuteCommand(Box.Text)
+			Box.Text = ""
+		end
+	end)
+
+	-- DRAG
+	Top.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			CmdBarDragging = true
+			CmdBarDragOffset = i.Position - Frame.AbsolutePosition
+		end
+	end)
+
+	Top.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then
+			CmdBarDragging = false
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(i)
+		if CmdBarDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+			Frame.Position = UDim2.new(
+				0, i.Position.X - CmdBarDragOffset.X,
+				0, i.Position.Y - CmdBarDragOffset.Y
+			)
+		end
+	end)
+
+	-- MINIMIZAR (ESCONDE TUDO MENOS TOPO)
+	Min.MouseButton1Click:Connect(function()
+		CmdBarExpanded = not CmdBarExpanded
+		Box.Visible = CmdBarExpanded
+		Frame.Size = CmdBarExpanded
+			and UDim2.new(0,260,0,90)
+			or UDim2.new(0,260,0,25)
+	end)
+end-- ===============================================
+-- QUADRADOS VISUAIS ROXOS (EXTRA EFFECT)
+-- COLAR NO FIM DO SCRIPT
+-- ===============================================
+
+local PurpleSquares = {}
+local SquareCount = 35
+
+local MenuWidth = MenuFrame.Size.X.Offset
+local MenuHeight = MenuFrame.Size.Y.Offset
+
+for i = 1, SquareCount do
+	local size = math.random(4, 10)
+
+	local sq = Instance.new("Frame")
+	sq.Size = UDim2.new(0, size, 0, size)
+	sq.Position = UDim2.new(
+		0, math.random(0, MenuWidth - size),
+		0, math.random(30, MenuHeight - size)
+	)
+	sq.BackgroundColor3 = Color3.fromRGB(170, 0, 255) -- ROXO
+	sq.BackgroundTransparency = math.random(0, 30) / 100
+	sq.BorderSizePixel = 0
+	sq.Parent = MenuFrame
+
+	table.insert(PurpleSquares, {
+		frame = sq,
+		speed = math.random(1, 3),
+		phase = math.random() * 10
+	})
+end
+
+RunService.RenderStepped:Connect(function()
+	for _,data in ipairs(PurpleSquares) do
+		local sq = data.frame
+
+		-- movimento vertical
+		sq.Position = UDim2.new(
+			0, sq.Position.X.Offset,
+			0, sq.Position.Y.Offset + data.speed
+		)
+
+		-- reset quando sai da tela
+		if sq.Position.Y.Offset > MenuHeight then
+			sq.Position = UDim2.new(
+				0, math.random(0, MenuWidth - sq.Size.X.Offset),
+				0, 30
+			)
+		end
+
+		-- efeito de pulsar
+		data.phase += 0.15
+		local pulse = (math.sin(data.phase) + 1) / 2
+		sq.BackgroundColor3 = Color3.fromRGB(
+			150 + pulse * 80,
+			0,
+			200 + pulse * 55
+		)
+	end
+end)-- ===============================================
+-- VISUAL LAYER (FUNDO SEM TEXTO)
+-- ===============================================
+
+-- camada só pra efeitos visuais
+local VisualLayer = Instance.new("Frame")
+VisualLayer.Name = "VisualLayer"
+VisualLayer.Size = UDim2.new(1, 0, 1, -30) -- ignora TopBar
+VisualLayer.Position = UDim2.new(0, 0, 0, 30)
+VisualLayer.BackgroundTransparency = 1
+VisualLayer.ClipsDescendants = true
+VisualLayer.ZIndex = 1
+VisualLayer.Parent = MenuFrame
+
+-- garante que UI fique acima
+local function ForceTextOnTop()
+	for _,obj in ipairs(MenuFrame:GetDescendants()) do
+		if obj:IsA("TextLabel") or obj:IsA("TextBox") or obj:IsA("TextButton") then
+			obj.ZIndex = 5
+		end
+	end
+end
+
+ForceTextOnTop()
