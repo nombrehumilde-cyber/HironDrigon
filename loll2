@@ -26,8 +26,8 @@ local Whitelist = {
     "HironDrigon",
     "medr0so_0",
     "Arthurfelipe_blox2", 
-    "Davilucca",
-    "K666pkildd"
+    "Davilucca"
+    
 }
 
 local function IsWhitelisted(plr)
