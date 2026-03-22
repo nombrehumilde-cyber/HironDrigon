@@ -10194,36 +10194,600 @@ end
 end
 
 })
---// ADMIN TAB + WHITELIST
+local Tab = Window:MakeTab({"FE", "rbxassetid://121106070017957"})
 
-local AdminTab = Window:Tab({
-    Title = "Admin",
-    Icon = "shield"
-})
-
--- WHITELIST
-local Whitelist = {
-    ["medr0so_0"] = true,
-    ["Arthurfelipe_blox2"] = true,
-    ["Davishe98"] = true,
-    ["K666pkildd"] = true
-}
-
--- CHECK WHITELIST
-if not Whitelist[game.Players.LocalPlayer.Name] then
-    game.Players.LocalPlayer:Kick("Você não está na whitelist.")
-end
-
--- SECTION
-AdminTab:Section({
-    Title = "Se vc não estiver na whitelist você será kickado!"
-})
-
--- BOTÃO ADMIN
-AdminTab:Button({
-    Title = "Admin",
+Tab:AddButton({
+    Name = "Naruto",
+    Desc = "Naruto FE.",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/nombrehumilde-cyber/HironDrigon/refs/heads/main/lol"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas"))()
     end
 })
-loadstring(game:HttpGet("https://pastefy.app/X1EIRKRd/raw"))()
+
+Tab:AddButton({
+    Name = "Batman",
+    Description = "Batman FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas89"))()
+    end
+})
+
+Tab:AddButton({
+    Name = "Sonic.Exe",
+    Description = "Sonic.Exe FE.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas86"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Panico",
+    Desc = "Pânico FE",
+    Locked = false,
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/yyyyyyyface/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Morty",
+    Desc = "Morty FE",
+    Locked = false,
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Mortyyyyyy/refs/heads/main/Main.txt"))()
+     end
+})
+
+Tab:AddButton({
+    Title = "Rick Sanchez",
+    Desc = "Rick Sanchez FE",
+    Locked = false,
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/rick-Sanchez-/refs/heads/main/Main.txt"))()
+  end
+})
+
+Tab:AddButton({
+    Title = "Cowboy",
+    Desc = "Cowboy FE",
+    Locked = false,
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/wjsj/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Guest666 FE",
+    Desc = "Guest666 FE",
+    Locked = false,
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/swsw/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Camera De Carro",
+    Desc = "carro no roblox kkj",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Carfling/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Fe vr",
+    Desc = "FE VR",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+
+        local noobArms = {84451219120140, 72292903231768}
+
+        local function equipNoobArms()
+            for _, id in ipairs(noobArms) do
+                local success, err = pcall(function()
+                    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id)
+                end)
+            end
+        end
+
+        equipNoobArms()
+
+        task.delay(6, function()
+            local success, err = pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/Qwerty/refs/heads/main/qwerty45.lua"))()
+            end)
+        end)
+    end
+})
+
+Tab:AddButton({
+    Title = "Obito",
+    Desc = "Obito FE",
+    Locked = false,
+    Callback = function()
+      loadstring(game:HttpGet("https://cdn.authguard.org/virtual-file/c47b8a12ca6c4cef840280dafd893e7d"))()
+    end
+})
+
+Tab:AddButton({
+	Name = "Shadow",
+	Desc = "Shadow FE",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Shadow/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+	Name = "Goner",
+	Desc = "Executa o Goner fe",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/GONER/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+	Name = "Noly",
+	Desc = "Noly FE",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/gubby/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+	Name = "Tubers",
+	Desc = "Tubers FE",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/1222/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+    Title = "mãozinha",
+    Desc = "mãozinha FE",
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/slafiznotedio/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "C00LKIDD",
+    Desc = "C00LKIDD FE",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/xzzxsx/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Emote v2",
+    Desc = "Emotes FREE",
+    Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/main/Delta%20mad%20stuffs"))()
+    end
+})
+
+
+Tab:AddButton({
+	Name = "Herobrine",
+	Desc = "Herobrine FE",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/hEROBRINE/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+    Name = "John doe",
+    Description = "John Doe FE",
+    Callback = function()
+        pcall(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+            local ChangeBodyColor = ReplicatedStorage.Remotes.ChangeBodyColor
+            local ChangeCharacterBody = ReplicatedStorage.Remotes.ChangeCharacterBody
+            local Wear = ReplicatedStorage.Remotes.Wear
+
+            ChangeBodyColor:FireServer("Really black")
+
+            ChangeCharacterBody:InvokeServer({
+                0, 0, 0, 0, 0, 0
+            })
+
+            Wear:InvokeServer(119700638189201)
+            Wear:InvokeServer(82561279414761)
+            Wear:InvokeServer(108099676910294)
+            Wear:InvokeServer(82861921093234)
+            Wear:InvokeServer(124476454384081)
+            Wear:InvokeServer(5319900634)
+            Wear:InvokeServer(5319909330)
+            Wear:InvokeServer(5319922112)
+        end)
+    end
+})
+
+Tab:AddButton({
+	Name = "CARTOON CAT",
+	Description = "CARTOON CAT FE",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/cartoon-cat/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+	Name = "Ominitrix",
+	Desc = "Ominitrix FE",
+	Callback = function()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Ominitrix/refs/heads/main/Main.txt"))()
+		end)
+	end
+})
+
+Tab:AddButton({
+    Title = "Kamui",
+    Desc = "Ativa o Kamui (hubzin)",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/kamui/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Jerk",
+    Desc = "Jerk FE",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yeahblxr/Scripts/refs/heads/main/Edge.lua"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Emotes fe",
+    Desc = "Emotes fe :)",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Open-Alpha-50210"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Jeff The Killer",
+    Desc = "Jeff The Killer FE",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Jeff/refs/heads/main/Main.txt"))()
+    end
+})
+
+Tab:AddButton({
+    Title = "Minecraft",
+    Desc = "Minecraft no roblox kk",
+    Locked = false,
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+        task.spawn(function()
+            local WearShirt = ReplicatedStorage.Remotes:FindFirstChild("WearShirt")
+            if WearShirt then
+                pcall(function()
+                    WearShirt:InvokeServer(16512333409)
+                end)
+            end
+
+            task.wait(0.2)
+
+            local ChangeCharacterBody = ReplicatedStorage.Remotes:FindFirstChild("ChangeCharacterBody")
+            if ChangeCharacterBody then
+                pcall(function()
+                    ChangeCharacterBody:InvokeServer({0, 0, 0, 0, 0, 0})
+                end)
+            end
+
+            task.wait(0.2)
+
+            local WearPants = ReplicatedStorage.Remotes:FindFirstChild("WearPants")
+            if WearPants then
+                pcall(function()
+                    WearPants:InvokeServer(16512431524)
+                end)
+            end
+
+            task.wait(0.2)
+
+            local Wear = ReplicatedStorage.Remotes:FindFirstChild("Wear")
+            if Wear then
+                pcall(function()
+                    Wear:InvokeServer(137179147781164)
+                end)
+            end
+
+            task.wait(0.2)
+
+            local ChangeBodyColor = ReplicatedStorage.Remotes:FindFirstChild("ChangeBodyColor")
+            if ChangeBodyColor then
+                pcall(function()
+                    ChangeBodyColor:FireServer("Dark nougat")
+                end)
+            end
+        end)
+
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        local spawnToolTextures = {
+            "rbxassetid://106513645844271",
+            "rbxassetid://9267155972",
+            "rbxassetid://9267183930",
+            "rbxassetid://9359131807",
+            "rbxassetid://9277770677",
+            "rbxassetid://11547302007",
+            "rbxassetid://7341687607",
+            "rbxassetid://7696392982",
+            "rbxassetid://8677289915",
+            "rbxassetid://9184126359",
+            "rbxassetid://7901287342",
+            "rbxassetid://8677286748",
+            "rbxassetid://8677288274"
+        }
+
+        local function isSpawnedBlock(part)
+            if not part:IsA("Part") then
+                return false
+            end
+            
+            for _, decal in ipairs(part:GetChildren()) do
+                if decal:IsA("Decal") then
+                    for _, textureId in ipairs(spawnToolTextures) do
+                        if decal.Texture == textureId then
+                            return true
+                        end
+                    end
+                end
+            end
+            
+            if part.Name == "Bloco com Fisica" then
+                return true
+            end
+            
+            if part.Size == Vector3.new(3, 3, 3) then
+                return true
+            end
+            
+            return false
+        end
+
+        local function getTargetBlock(mouse)
+            local target = mouse.Target
+            if target and target:IsA("BasePart") and isSpawnedBlock(target) then
+                return target
+            end
+        end
+
+        local function createNotification(title, message)
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = title,
+                Text = message,
+                Duration = 3
+            })
+        end
+
+        local deleteTool = Instance.new("Tool")
+        deleteTool.Name = "Sword goner"
+        deleteTool.RequiresHandle = true
+        deleteTool.CanBeDropped = true
+
+        local handle = Instance.new("Part")
+        handle.Name = "Handle"
+        handle.Size = Vector3.new(0.1, 0.1, 0.1)
+        handle.Massless = true
+        handle.Anchored = false
+        handle.CanCollide = false
+        handle.Transparency = 0.5
+        handle.Color = Color3.fromRGB(255, 0, 0)
+        local mesh = Instance.new("SpecialMesh", handle)
+        mesh.MeshType = Enum.MeshType.Sphere
+        mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
+        handle.Parent = deleteTool
+
+        deleteTool.Equipped:Connect(function(mouse)
+            local character = deleteTool.Parent
+            if character and character:FindFirstChild("Humanoid") and character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+                local args = {12780809235}
+                ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+
+                mouse.Button1Down:Connect(function()
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+                    if animator then
+                        local anim = Instance.new("Animation")
+                        anim.AnimationId = "rbxassetid://2410679501"
+                        local track = animator:LoadAnimation(anim)
+                        track:Play()
+                    end
+
+                    local targetBlock = getTargetBlock(mouse)
+                    if targetBlock then
+                        targetBlock:Destroy()
+                        createNotification("ðŸ—‘ï¸ Bloco Deletado", "Bloco spawnado removido com sucesso!")
+                    else
+                        createNotification("ðŸ’¡ Info", "Clique em um bloco spawnado para deletÃ¡-lo!")
+                    end
+                end)
+
+                createNotification("Picareta equipada", "Clique em blocos spawnados para deletÃ¡-los!")
+            end
+        end)
+
+        deleteTool.Unequipped:Connect(function()
+            local args = {12780809235}
+            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+            createNotification("Picareta Guardada", "Tool desequipado! Visual restaurado.")
+        end)
+
+        deleteTool.Parent = LocalPlayer.Backpack
+
+        local function createSpawnTool(textureId, imageId, hasPhysics)
+            local tool = Instance.new("Tool")
+            tool.Name = ""
+            tool.TextureId = textureId
+            tool.CanBeDropped = false
+            tool.Parent = LocalPlayer.Backpack
+
+            local handle = Instance.new("Part")
+            handle.Name = "Handle"
+            handle.Size = Vector3.new(1.5, 1.5, 1.5)
+            handle.Anchored = false
+            handle.CanCollide = false
+            handle.Color = Color3.fromRGB(255, 255, 255)
+            handle.Parent = tool
+
+            for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+                local decal = Instance.new("Decal")
+                decal.Texture = imageId
+                decal.Face = face
+                decal.Parent = handle
+            end
+
+            local mouse = LocalPlayer:GetMouse()
+
+            tool.Activated:Connect(function()
+                local pos = mouse.Hit.p
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(3, 3, 3)
+                part.Anchored = not hasPhysics
+                part.Position = pos + Vector3.new(0, 1.5, 0)
+                part.Parent = workspace
+                if hasPhysics then
+                    part.CanCollide = true
+                    part.Name = "Bloco com FÃ­sica"
+                end
+                
+                for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+                    local decal = Instance.new("Decal")
+                    decal.Texture = imageId
+                    decal.Face = face
+                    decal.Parent = part
+                end
+            end)
+        end
+
+        local function createSpawnToolWithDifferentTextures(textureId, sideImage, topImage)
+            local tool = Instance.new("Tool")
+            tool.Name = ""
+            tool.TextureId = textureId
+            tool.CanBeDropped = false
+            tool.Parent = LocalPlayer.Backpack
+
+            local handle = Instance.new("Part")
+            handle.Name = "Handle"
+            handle.Size = Vector3.new(1.5, 1.5, 1.5)
+            handle.Anchored = false
+            handle.CanCollide = false
+            handle.Color = Color3.fromRGB(255, 255, 255)
+            handle.Parent = tool
+
+            for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+                local decal = Instance.new("Decal")
+                decal.Texture = sideImage
+                decal.Face = face
+                decal.Parent = handle
+            end
+
+            local mouse = LocalPlayer:GetMouse()
+
+            tool.Activated:Connect(function()
+                local pos = mouse.Hit.p
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(3, 3, 3)
+                part.Anchored = true
+                part.Position = pos + Vector3.new(0, 1.5, 0)
+                part.Parent = workspace
+                
+                for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+                    local decal = Instance.new("Decal")
+                    if face == Enum.NormalId.Top then
+                        decal.Texture = topImage
+                    else
+                        decal.Texture = sideImage
+                    end
+                    decal.Face = face
+                    decal.Parent = part
+                end
+            end)
+        end
+
+        createSpawnTool("rbxassetid://106513645844271", "rbxassetid://106513645844271", false)
+        createSpawnToolWithDifferentTextures("rbxassetid://9267155972", "rbxassetid://9267155972", "rbxassetid://9267183930")
+        createSpawnTool("rbxassetid://9359131807", "rbxassetid://9359131807", false)
+        createSpawnTool("rbxassetid://9277770677", "rbxassetid://9277770677", true)
+        createSpawnTool("rbxassetid://11547302007", "rbxassetid://11547302007", false)
+        createSpawnTool("rbxassetid://7341687607", "rbxassetid://7341687607", false)
+        createSpawnTool("rbxassetid://7696392982", "rbxassetid://7696392982", false)
+        createSpawnTool("rbxassetid://8677289915", "rbxassetid://8677289915", false)
+        createSpawnTool("rbxassetid://9184126359", "rbxassetid://9184126359", false)
+        createSpawnTool("rbxassetid://7901287342", "rbxassetid://7901287342", false)
+        createSpawnTool("rbxassetid://8677286748", "rbxassetid://8677286748", false)
+        createSpawnTool("rbxassetid://8677288274", "rbxassetid://8677288274", false)
+        createSpawnTool("rbxassetid://14934313194", "rbxassetid://14934313194", false)
+
+        local transparentTool = Instance.new("Tool")
+        transparentTool.Name = ""
+        transparentTool.TextureId = "rbxassetid://14934219909"
+        transparentTool.CanBeDropped = false
+        transparentTool.Parent = LocalPlayer.Backpack
+
+        local transparentHandle = Instance.new("Part")
+        transparentHandle.Name = "Handle"
+        transparentHandle.Size = Vector3.new(1.5, 1.5, 1.5)
+        transparentHandle.Anchored = false
+        transparentHandle.CanCollide = false
+        transparentHandle.Transparency = 1
+        transparentHandle.Parent = transparentTool
+
+        local transparentImage = "rbxassetid://14934219909"
+
+        for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+            local decal = Instance.new("Decal")
+            decal.Texture = transparentImage
+            decal.Face = face
+            decal.Parent = transparentHandle
+        end
+
+        local transparentMouse = LocalPlayer:GetMouse()
+
+        transparentTool.Activated:Connect(function()
+            local pos = transparentMouse.Hit.p
+            local part = Instance.new("Part")
+            part.Size = Vector3.new(3, 3, 3)
+            part.Position = pos + Vector3.new(0, 1.5, 0)
+            part.Anchored = true
+            part.CanCollide = true   
+            part.Transparency = 1
+            part.Parent = workspace
+
+            for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+                local decal = Instance.new("Decal")
+                decal.Texture = transparentImage
+                decal.Face = face
+                decal.Parent = part
+            end
+        end)
+
+        createNotification("Minecraft FE", "Script carregado com sucesso! Ferramentas adicionadas ao inventÃ¡rio.")
+    end
+})
+
+Tab:AddParagraph({ "Os scripts dessa tab não funcionam mais, apenas as skins e os itens delas estão pegando)" })
