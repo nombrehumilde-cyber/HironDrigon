@@ -1378,8 +1378,11 @@ function redzlib:SetTheme(NewTheme)
 	table.foreach(redzlib.Instances, function(_,Val)
 		if Val.Type == "Gradient" then
 			Val.Instance.Color = Theme["Color Hub 1"]
-		elseif Val.Type == "Frame" then
-			Val.Instance.BackgroundColor3 = Theme["Color Hub 2"]
+			elseif Val.Type == "Frame" then
+				Val.Instance.BackgroundColor3 = Theme["Color Hub 2"]
+				if Val.Instance.Name == "Hub" or Val.Instance.Name == "Tab Scroll" or Val.Instance.Name:find("Container") then
+					Val.Instance.BackgroundTransparency = 1
+				end
 		elseif Val.Type == "Stroke" then
 			Val.Instance[GetColor(Val.Instance)] = Theme["Color Stroke"]
 		elseif Val.Type == "Theme" then
@@ -1422,13 +1425,13 @@ function redzlib:MakeWindow(Configs)
 	end;LoadFile()
 	
 	local UISizeX, UISizeY = unpack(redzlib.Save.UISize)
-		local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
-			Size = UDim2.fromOffset(UISizeX, UISizeY),
-			Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2),
-			BackgroundTransparency = 0.2, -- Um pouco transparente como solicitado
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			Name = "Hub"
-		}), "Main")
+			local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
+				Size = UDim2.fromOffset(UISizeX, UISizeY),
+				Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2),
+				BackgroundTransparency = 1, -- Fundo totalmente transparente
+				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+				Name = "Hub"
+			}), "Main")
 		
 		-- Animação de bolinhas brancas e pretas caindo para cima
 		task.spawn(function()
@@ -1441,13 +1444,13 @@ function redzlib:MakeWindow(Configs)
 			
 			while task.wait(0.1) do
 				if not MainFrame or not MainFrame.Parent then break end
-				local Particle = Create("Frame", ParticleContainer, {
-					Size = UDim2.fromOffset(math.random(2, 4), math.random(2, 4)),
-					Position = UDim2.new(math.random(), 0, 1, 10),
-					BackgroundColor3 = math.random(1, 2) == 1 and Color3.new(1, 1, 1) or Color3.new(0, 0, 0),
-					BorderSizePixel = 0,
-					ZIndex = 0
-				})
+					local Particle = Create("Frame", ParticleContainer, {
+						Size = UDim2.fromOffset(math.random(10, 25), math.random(10, 25)), -- Bolas maiores estilo Drip Client
+						Position = UDim2.new(math.random(), 0, 1, 25),
+						BackgroundColor3 = math.random(1, 2) == 1 and Color3.new(1, 1, 1) or Color3.new(0, 0, 0),
+						BorderSizePixel = 0,
+						ZIndex = 0
+					})
 				Create("UICorner", Particle, {CornerRadius = UDim.new(1, 0)})
 				
 				local Tween = TweenService:Create(Particle, TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Linear), {
@@ -1508,21 +1511,21 @@ function redzlib:MakeWindow(Configs)
 		}), "DarkText")
 	}), "Text")
 	
-		local MainScroll = InsertTheme(Create("ScrollingFrame", Components, {
-			Size = UDim2.new(0, redzlib.Save.TabSize, 1, -TopBar.Size.Y.Offset),
-			ScrollBarImageColor3 = Theme["Color Theme"],
-			Position = UDim2.new(0, 0, 1, 0),
-			AnchorPoint = Vector2.new(0, 1),
-			ScrollBarThickness = 1.5,
-			BackgroundTransparency = 0, -- Sem transparência
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
-			ScrollBarImageTransparency = 0.2,
-			CanvasSize = UDim2.new(),
-			AutomaticCanvasSize = "Y",
-			ScrollingDirection = "Y",
-			BorderSizePixel = 0,
-			Name = "Tab Scroll"
-		}, {
+			local MainScroll = InsertTheme(Create("ScrollingFrame", Components, {
+				Size = UDim2.new(0, redzlib.Save.TabSize, 1, -TopBar.Size.Y.Offset),
+				ScrollBarImageColor3 = Theme["Color Theme"],
+				Position = UDim2.new(0, 0, 1, 0),
+				AnchorPoint = Vector2.new(0, 1),
+				ScrollBarThickness = 1.5,
+				BackgroundTransparency = 1, -- Transparente para manter o estilo
+				BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
+				ScrollBarImageTransparency = 0.2,
+				CanvasSize = UDim2.new(),
+				AutomaticCanvasSize = "Y",
+				ScrollingDirection = "Y",
+				BorderSizePixel = 0,
+				Name = "Tab Scroll"
+			}, {
 		Create("UIPadding", {
 			PaddingLeft = UDim.new(0, 10),
 			PaddingRight = UDim.new(0, 10),
@@ -1843,21 +1846,21 @@ function redzlib:MakeWindow(Configs)
 			BackgroundTransparency = FirstTab and 1 or 0
 		}), "Theme")Make("Corner", Selected, UDim.new(0.5, 0))
 		
-			local Container = InsertTheme(Create("ScrollingFrame", {
-				Size = UDim2.new(1, 0, 1, 0),
-				Position = UDim2.new(0, 0, 1),
-				AnchorPoint = Vector2.new(0, 1),
-				ScrollBarThickness = 1.5,
-				BackgroundTransparency = 0, -- Sem transparência
-				BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
-				ScrollBarImageTransparency = 0.2,
-				ScrollBarImageColor3 = Theme["Color Theme"],
-				AutomaticCanvasSize = "Y",
-				ScrollingDirection = "Y",
-				BorderSizePixel = 0,
-				CanvasSize = UDim2.new(),
-				Name = ("Container %i [ %s ]"):format(#ContainerList + 1, TName)
-			}, {
+				local Container = InsertTheme(Create("ScrollingFrame", {
+					Size = UDim2.new(1, 0, 1, 0),
+					Position = UDim2.new(0, 0, 1),
+					AnchorPoint = Vector2.new(0, 1),
+					ScrollBarThickness = 1.5,
+					BackgroundTransparency = 1, -- Transparente para manter o estilo
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
+					ScrollBarImageTransparency = 0.2,
+					ScrollBarImageColor3 = Theme["Color Theme"],
+					AutomaticCanvasSize = "Y",
+					ScrollingDirection = "Y",
+					BorderSizePixel = 0,
+					CanvasSize = UDim2.new(),
+					Name = ("Container %i [ %s ]"):format(#ContainerList + 1, TName)
+				}, {
 			Create("UIPadding", {
 				PaddingLeft = UDim.new(0, 10),
 				PaddingRight = UDim.new(0, 10),
