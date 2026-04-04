@@ -1428,7 +1428,7 @@ function redzlib:MakeWindow(Configs)
 			local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
 				Size = UDim2.fromOffset(UISizeX, UISizeY),
 				Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2),
-					BackgroundTransparency = 0.6, -- Fundo semi-transparente para ver as bolinhas
+					BackgroundTransparency = 0.3, -- Fundo semi-transparente para ver as bolinhas
 				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 				Name = "Hub"
 			}), "Main")
