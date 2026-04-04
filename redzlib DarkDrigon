@@ -1381,7 +1381,7 @@ function redzlib:SetTheme(NewTheme)
 			elseif Val.Type == "Frame" then
 				Val.Instance.BackgroundColor3 = Theme["Color Hub 2"]
 				if Val.Instance.Name == "Hub" or Val.Instance.Name == "Tab Scroll" or Val.Instance.Name:find("Container") then
-					Val.Instance.BackgroundTransparency = 1
+					Val.Instance.BackgroundTransparency = 0.6
 				end
 		elseif Val.Type == "Stroke" then
 			Val.Instance[GetColor(Val.Instance)] = Theme["Color Stroke"]
@@ -1428,7 +1428,7 @@ function redzlib:MakeWindow(Configs)
 			local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
 				Size = UDim2.fromOffset(UISizeX, UISizeY),
 				Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2),
-				BackgroundTransparency = 1, -- Fundo totalmente transparente
+					BackgroundTransparency = 0.6, -- Fundo semi-transparente para ver as bolinhas
 				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 				Name = "Hub"
 			}), "Main")
@@ -1517,14 +1517,14 @@ function redzlib:MakeWindow(Configs)
 				Position = UDim2.new(0, 0, 1, 0),
 				AnchorPoint = Vector2.new(0, 1),
 				ScrollBarThickness = 1.5,
-				BackgroundTransparency = 1, -- Transparente para manter o estilo
-				BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
-				ScrollBarImageTransparency = 0.2,
-				CanvasSize = UDim2.new(),
-				AutomaticCanvasSize = "Y",
-				ScrollingDirection = "Y",
-				BorderSizePixel = 0,
-				Name = "Tab Scroll"
+					BackgroundTransparency = 0.6, -- Semi-transparente para manter o estilo
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
+					ScrollBarImageTransparency = 0.2,
+					CanvasSize = UDim2.new(),
+					AutomaticCanvasSize = "Y",
+					ScrollingDirection = "Y",
+					BorderSizePixel = 0,
+					Name = "Tab Scroll"
 			}, {
 		Create("UIPadding", {
 			PaddingLeft = UDim.new(0, 10),
@@ -1851,7 +1851,7 @@ function redzlib:MakeWindow(Configs)
 					Position = UDim2.new(0, 0, 1),
 					AnchorPoint = Vector2.new(0, 1),
 					ScrollBarThickness = 1.5,
-					BackgroundTransparency = 1, -- Transparente para manter o estilo
+					BackgroundTransparency = 0.6, -- Semi-transparente para manter o estilo
 					BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
 					ScrollBarImageTransparency = 0.2,
 					ScrollBarImageColor3 = Theme["Color Theme"],
