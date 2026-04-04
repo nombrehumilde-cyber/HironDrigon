@@ -1381,7 +1381,7 @@ function redzlib:SetTheme(NewTheme)
 			elseif Val.Type == "Frame" then
 				Val.Instance.BackgroundColor3 = Theme["Color Hub 2"]
 				if Val.Instance.Name == "Hub" or Val.Instance.Name == "Tab Scroll" or Val.Instance.Name:find("Container") then
-					Val.Instance.BackgroundTransparency = 0.6
+					Val.Instance.BackgroundTransparency = 0.3
 				end
 		elseif Val.Type == "Stroke" then
 			Val.Instance[GetColor(Val.Instance)] = Theme["Color Stroke"]
@@ -1517,7 +1517,7 @@ function redzlib:MakeWindow(Configs)
 				Position = UDim2.new(0, 0, 1, 0),
 				AnchorPoint = Vector2.new(0, 1),
 				ScrollBarThickness = 1.5,
-					BackgroundTransparency = 0.6, -- Semi-transparente para manter o estilo
+					BackgroundTransparency = 0.3, -- Semi-transparente para manter o estilo
 					BackgroundColor3 = Color3.fromRGB(0, 0, 0), -- Preto
 					ScrollBarImageTransparency = 0.2,
 					CanvasSize = UDim2.new(),
